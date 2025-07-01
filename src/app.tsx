@@ -8,11 +8,11 @@ import { LineChart } from "./components/line-chart";
 import { useResponsiveLayout } from "./hooks/use-responsive-layout";
 import { usePing } from "./hooks/use-ping";
 
-// Modern gradients for the app
-const headerGradient = gradient(["#6366f1", "#8b5cf6"]);
-const successGradient = gradient(["#10b981", "#059669"]);
-const errorGradient = gradient(["#ef4444", "#dc2626"]);
-const metricGradient = gradient(["#06b6d4", "#0891b2"]);
+// Modern gradients for the app - Brighter colors
+const headerGradient = gradient(["#8b5cf6", "#a855f7"]);
+const successGradient = gradient(["#22c55e", "#16a34a"]);
+const errorGradient = gradient(["#f87171", "#ef4444"]);
+const metricGradient = gradient(["#38bdf8", "#0ea5e9"]);
 
 type Props = {
   host: string;
@@ -65,15 +65,19 @@ export default function App({ host, options }: Props) {
                   <Text color="gray">|</Text>
                   <Text
                     color={
-                      ping.successRate >= 95 ? "green" : ping.successRate >= 80 ? "yellow" : "red"
+                      ping.successRate >= 95
+                        ? "greenBright"
+                        : ping.successRate >= 80
+                          ? "yellowBright"
+                          : "redBright"
                     }
                   >
                     {ping.successRate.toFixed(1)}% success
                   </Text>
                   <Text color="gray">|</Text>
-                  <Text color="red">{ping.errorRate.toFixed(1)}% error</Text>
+                  <Text color="redBright">{ping.errorRate.toFixed(1)}% error</Text>
                   <Text color="gray">|</Text>
-                  <Text color="cyan">
+                  <Text color="cyanBright">
                     {ping.totalPings > 1
                       ? (
                           (new Date().getTime() - ping.startTime.getTime()) /
@@ -136,22 +140,26 @@ export default function App({ host, options }: Props) {
           >
             {/* Primary Stats Row */}
             <Box>
-              <Box width="33%" minWidth={25} maxWidth={35} paddingRight={1}>
+              <Box width="33%" minWidth={25} paddingRight={1}>
                 <Text color="gray">
                   Success: <Text>{successGradient(`${ping.successfulPings} packets`)}</Text>
                 </Text>
               </Box>
-              <Box width="33%" minWidth={25} maxWidth={35} paddingX={1}>
+              <Box width="33%" minWidth={25} paddingX={1}>
                 <Text color="gray">
                   Failed: <Text>{errorGradient(`${ping.failedPings} packets`)}</Text>
                 </Text>
               </Box>
-              <Box width="34%" minWidth={25} maxWidth={35} paddingLeft={1}>
+              <Box width="34%" minWidth={25} paddingLeft={1}>
                 <Text color="gray">
                   Rate:{" "}
                   <Text
                     color={
-                      ping.successRate >= 95 ? "green" : ping.successRate >= 80 ? "yellow" : "red"
+                      ping.successRate >= 95
+                        ? "greenBright"
+                        : ping.successRate >= 80
+                          ? "yellowBright"
+                          : "redBright"
                     }
                   >
                     {ping.successRate.toFixed(1)}%
@@ -191,13 +199,17 @@ export default function App({ host, options }: Props) {
             <Box>
               <Box width="33%">
                 <Text color="gray">
-                  Packet Loss: <Text color="red">{ping.analysis.packetLoss.toFixed(2)}%</Text>
+                  Packet Loss: <Text color="redBright">{ping.analysis.packetLoss.toFixed(2)}%</Text>
                 </Text>
               </Box>
               <Box width="33%">
                 <Text color="gray">
                   Current Streak:{" "}
-                  <Text color={ping.analysis.currentStreak.type === "success" ? "green" : "red"}>
+                  <Text
+                    color={
+                      ping.analysis.currentStreak.type === "success" ? "greenBright" : "redBright"
+                    }
+                  >
                     {ping.analysis.currentStreak.count}{" "}
                     {ping.analysis.currentStreak.type === "success" ? "successes" : "failures"}
                   </Text>
@@ -205,29 +217,21 @@ export default function App({ host, options }: Props) {
               </Box>
               <Box width="34%">
                 <Text color="gray">
-                  Duration: <Text color="cyan">{ping.duration}</Text>
-                </Text>
-              </Box>
-            </Box>
-
-            {/* Success/Error Rate Table */}
-            <Box marginTop={1}>
-              <Box width="50%">
-                <Text color="gray">
-                  Success Rate: <Text color="green">{ping.successRate.toFixed(1)}%</Text>
-                </Text>
-              </Box>
-              <Box width="50%">
-                <Text color="gray">
-                  Error Rate: <Text color="red">{ping.errorRate.toFixed(1)}%</Text>
+                  Duration: <Text color="cyanBright">{ping.duration}</Text>
                 </Text>
               </Box>
             </Box>
           </Box>
 
           {/* Detailed Metrics Section */}
-          <Box flexDirection="column" gap={1} padding={1} borderStyle="single" borderColor="blue">
-            <Text bold color="cyan">
+          <Box
+            flexDirection="column"
+            gap={1}
+            padding={1}
+            borderStyle="single"
+            borderColor="blueBright"
+          >
+            <Text bold color="cyanBright">
               Network Performance Details:
             </Text>
 
@@ -239,15 +243,17 @@ export default function App({ host, options }: Props) {
               <Box gap={3} alignItems="center" flexWrap="wrap" marginTop={1} paddingLeft={1}>
                 <Text color="gray">
                   Min Response:{" "}
-                  <Text color="green">{ping.analysis.minSuccessTimeHuman || "N/A"}</Text>
+                  <Text color="greenBright">{ping.analysis.minSuccessTimeHuman || "N/A"}</Text>
                 </Text>
                 <Text color="gray">
                   Max Response:{" "}
-                  <Text color="yellow">{ping.analysis.maxSuccessTimeHuman || "N/A"}</Text>
+                  <Text color="yellowBright">{ping.analysis.maxSuccessTimeHuman || "N/A"}</Text>
                 </Text>
                 <Text color="gray">
                   Median:{" "}
-                  <Text color="cyan">{ping.analysis.medianSuccessTime?.toFixed(2) || "N/A"}ms</Text>
+                  <Text color="cyanBright">
+                    {ping.analysis.medianSuccessTime?.toFixed(2) || "N/A"}ms
+                  </Text>
                 </Text>
               </Box>
               <Box gap={3} alignItems="center" flexWrap="wrap" marginTop={1} paddingLeft={1}>
@@ -298,17 +304,17 @@ export default function App({ host, options }: Props) {
               <Box gap={3} alignItems="center" flexWrap="wrap" marginTop={1} paddingLeft={1}>
                 <Text color="gray">
                   Stability:{" "}
-                  <Text color={ping.analysis.isStable ? "green" : "red"}>
+                  <Text color={ping.analysis.isStable ? "greenBright" : "redBright"}>
                     {ping.analysis.isStable ? "Network Stable" : "Network Unstable"}
                   </Text>
                 </Text>
                 <Text color="gray">
                   Best Streak:{" "}
-                  <Text color="green">{ping.analysis.longestSuccessStreak} successes</Text>
+                  <Text color="greenBright">{ping.analysis.longestSuccessStreak} successes</Text>
                 </Text>
                 <Text color="gray">
                   Worst Streak:{" "}
-                  <Text color="red">{ping.analysis.longestFailureStreak} failures</Text>
+                  <Text color="redBright">{ping.analysis.longestFailureStreak} failures</Text>
                 </Text>
               </Box>
             </Box>
