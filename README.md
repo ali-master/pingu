@@ -72,8 +72,7 @@ Invoke-WebRequest -Uri "https://github.com/ali-master/pingu/releases/latest/down
 $env:PATH += ";$PWD"
 ```
 
-
-### Upgrading Pingu
+## 🔄 Upgrading Pingu
 
 #### Automatic Upgrade
 
@@ -127,6 +126,64 @@ bun install
 bun run build
 
 # Binary will be available at ./dist/pingu
+```
+
+## 🗑️ Uninstalling Pingu
+
+### Automatic Uninstall
+
+If you installed Pingu using the installation script, you can remove it with:
+
+```bash
+# Remove from system-wide location
+sudo rm -f /usr/local/bin/pingu
+
+# Or remove from user location
+rm -f ~/.local/bin/pingu
+rm -f ~/bin/pingu
+
+# Windows users
+# Remove from user directory
+Remove-Item "$HOME\.pingu\pingu.exe" -Force
+Remove-Item "$HOME\.pingu" -Force
+```
+
+### Complete Uninstall
+
+To completely remove Pingu and all related files:
+
+```bash
+# 1. Remove the binary
+sudo rm -f /usr/local/bin/pingu
+rm -f ~/.local/bin/pingu
+rm -f ~/bin/pingu
+
+# 2. Remove shell completions (if installed)
+# Bash
+rm -f ~/.local/share/bash-completion/completions/pingu
+sudo rm -f /usr/local/etc/bash_completion.d/pingu
+
+# Zsh
+rm -f ~/.local/share/zsh/site-functions/_pingu
+
+# Fish
+rm -f ~/.config/fish/completions/pingu.fish
+
+# 3. Remove any configuration files (if any)
+rm -rf ~/.config/pingu
+rm -rf ~/.pingu
+
+# 4. Clean up PATH (if manually added)
+# Edit your shell config file (.bashrc, .zshrc, etc.) and remove any lines containing:
+# export PATH="$PATH:/path/to/pingu"
+```
+
+### Verify Uninstallation
+
+```bash
+# Check if pingu is removed
+which pingu  # Should return nothing
+pingu --version  # Should return "command not found"
 ```
 
 ## 📖 Usage
