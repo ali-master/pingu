@@ -3,7 +3,7 @@ import type { ResponsiveLayout } from "../components/dual-progress-bars";
 
 export const useResponsiveLayout = (): ResponsiveLayout => {
   const { stdout } = useStdout();
-  const terminalWidth = stdout?.columns || 80;
+  const terminalWidth = isNaN(stdout?.columns) ? 80 : (stdout?.columns ?? 80);
 
   return {
     isNarrow: terminalWidth < 60,
