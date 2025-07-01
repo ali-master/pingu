@@ -6,6 +6,7 @@ import meow from "meow";
 import App from "./app";
 import figlet from "figlet";
 import gradient from "gradient-string";
+import { generateCompletion, printCompletionHelp } from "./utils/completions";
 
 console.log();
 console.log(
@@ -23,6 +24,7 @@ const cli = meow(
   `
 	Usage
 	  $ pingu <host>
+	  $ pingu completion <shell>
 
 	Options
 		--count, -c       Number of ping packets to send (default: unlimited)
@@ -33,10 +35,15 @@ const cli = meow(
 		--size, -s        Number of data bytes to be sent (default: 56)
 		--export, -e      Export results to JSON file after completion
 
+	Commands
+		completion <shell>    Generate shell completion script (bash, zsh, fish)
+
 	Examples
 	  $ pingu google.com
 	  $ pingu -c 10 8.8.8.8
 	  $ pingu --count 5 --interval 2 example.com
+	  $ pingu completion bash > /usr/local/etc/bash_completion.d/pingu
+	  $ pingu completion zsh > ~/.local/share/zsh/site-functions/_pingu
 `,
   {
     importMeta: import.meta,
@@ -78,6 +85,26 @@ const cli = meow(
     },
   },
 );
+
+// Handle completion command
+if (cli.input[0] === "completion") {
+  const shell = cli.input[1];
+
+  if (!shell) {
+    printCompletionHelp();
+    process.exit(0);
+  }
+
+  try {
+    const completionScript = generateCompletion(shell);
+    console.log(completionScript);
+    process.exit(0);
+  } catch (error) {
+    console.error(`Error: ${(error as Error).message}`);
+    printCompletionHelp();
+    process.exit(1);
+  }
+}
 
 const host = cli.input[0];
 

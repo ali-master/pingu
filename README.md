@@ -152,19 +152,26 @@ pingu -e --count 20 cloudflare.com
 ```
 Usage
   $ pingu <host>
+  $ pingu completion <shell>
 
 Options
   --count, -c       Number of ping packets to send (default: unlimited)
+  --chart, -ch      Display chart (default: false)
+  --display, -d     Number of ping packets to display (default: 8)
   --interval, -i    Wait interval seconds between sending each packet (default: 1)
   --timeout, -t     Time to wait for a response, in seconds (default: 5)
   --size, -s        Number of data bytes to be sent (default: 56)
   --export, -e      Export results to JSON file after completion
+
+Commands
+  completion <shell>    Generate shell completion script (bash, zsh, fish)
 
 Examples
   $ pingu google.com
   $ pingu -c 10 8.8.8.8
   $ pingu --count 5 --interval 2 example.com
   $ pingu -e -c 100 cloudflare.com
+  $ pingu completion bash > ~/.local/share/bash-completion/completions/pingu
 ```
 
 ### Interface Overview
@@ -198,6 +205,62 @@ Pingu analyzes your network connection and provides detailed metrics:
 - **Packet Loss Tracking**: Real-time loss percentage calculation
 - **Response Time Distribution**: Categorized latency analysis
 - **Streak Tracking**: Success/failure pattern analysis
+
+## 🐚 Shell Completions
+
+Pingu includes built-in shell completion support for bash, zsh, and fish shells, providing intelligent tab completion for all commands and options.
+
+### Quick Setup
+
+The installer automatically sets up completions, but you can also configure them manually:
+
+**Bash:**
+```bash
+# Generate and install completion
+pingu completion bash > ~/.local/share/bash-completion/completions/pingu
+
+# Add to ~/.bashrc
+source ~/.local/share/bash-completion/completions/pingu
+```
+
+**Zsh:**
+```bash
+# Generate and install completion
+pingu completion zsh > ~/.local/share/zsh/site-functions/_pingu
+
+# Add to ~/.zshrc
+fpath=(~/.local/share/zsh/site-functions $fpath)
+autoload -U compinit && compinit
+```
+
+**Fish:**
+```bash
+# Generate and install completion (auto-loaded)
+pingu completion fish > ~/.config/fish/completions/pingu.fish
+```
+
+### Completion Features
+
+- **🎯 Smart option completion** - Tab complete all flags and options
+- **🔢 Value suggestions** - Intelligent suggestions for numeric options (count, interval, timeout)
+- **🌐 Hostname completion** - Common hosts like `google.com`, `8.8.8.8`, `1.1.1.1`
+- **📝 Contextual help** - Descriptions for all options and commands
+- **⚡ Subcommand support** - Complete the `completion` command and shell types
+
+### Usage Examples
+
+```bash
+# Tab completion for options
+pingu --c<TAB>          # → --count --chart
+pingu --count <TAB>     # → 1 2 3 4 5 10 20 50 100
+
+# Hostname completion
+pingu goo<TAB>          # → google.com
+pingu 8.<TAB>           # → 8.8.8.8
+
+# Completion command
+pingu completion <TAB>  # → bash zsh fish
+```
 
 ## 🛠️ Development
 
