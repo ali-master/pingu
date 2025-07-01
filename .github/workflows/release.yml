@@ -44,23 +44,48 @@ jobs:
         run: |
           mkdir -p dist
           
-          echo "Building Linux binaries..."
+          echo "Building cross-platform binaries..."
           
           # Linux x64 - most reliable target
           echo "Building Linux x64..."
           bun build --compile --minify ./src/cli.tsx --outfile dist/pingu-linux-amd64
           
-          # Try Linux ARM64 if supported
-          echo "Attempting Linux ARM64..."
+          # Linux ARM64
+          echo "Building Linux ARM64..."
           if bun build --compile --minify --target=bun-linux-arm64 ./src/cli.tsx --outfile dist/pingu-linux-arm64 2>/dev/null; then
             echo "✅ Linux ARM64 build successful"
-          elif bun build --compile --minify ./src/cli.tsx --outfile dist/pingu-linux-arm64 2>/dev/null; then
-            echo "✅ Linux ARM64 build successful (without target flag)"
           else
             echo "❌ Linux ARM64 build failed, skipping"
           fi
           
-          # Make binaries executable
+          # macOS x64 (Intel)
+          echo "Building macOS x64..."
+          if bun build --compile --minify --target=bun-darwin-x64 ./src/cli.tsx --outfile dist/pingu-macos-amd64 2>/dev/null; then
+            echo "✅ macOS x64 build successful"
+          else
+            echo "❌ macOS x64 build failed, skipping"
+          fi
+          
+          # macOS ARM64 (Apple Silicon)
+          echo "Building macOS ARM64..."
+          if bun build --compile --minify --target=bun-darwin-arm64 ./src/cli.tsx --outfile dist/pingu-macos-arm64 2>/dev/null; then
+            echo "✅ macOS ARM64 build successful"
+          else
+            echo "❌ macOS ARM64 build failed, skipping"
+          fi
+          
+          # Windows x64
+          echo "Building Windows x64..."
+          if bun build --compile --minify --target=bun-windows-x64 ./src/cli.tsx --outfile dist/pingu-windows-amd64.exe 2>/dev/null; then
+            echo "✅ Windows x64 build successful"
+          else
+            echo "❌ Windows x64 build failed, skipping"
+          fi
+          
+          # Skip Windows ARM64 as it's not supported by Bun yet
+          echo "⏭️ Skipping Windows ARM64 (not supported by Bun)"
+          
+          # Make binaries executable (Unix-like systems)
           chmod +x dist/pingu-* 2>/dev/null || true
 
       - name: Verify binaries
@@ -91,81 +116,122 @@ jobs:
             exit 1
           fi
 
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
-      - name: Generate release notes
+      - name: Generate Changelog
         run: |
-          cat > release_notes.md << 'EOF'
-          ## 🚀 Pingu ${{ steps.version.outputs.VERSION }}
+          # Extract version without refs prefix
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "Generating changelog for version: $VERSION"
           
-          A modern ping utility with beautiful CLI output and comprehensive network analysis.
+          # Get previous tag for changelog comparison
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Comparing with previous tag: $PREVIOUS_TAG"
+            CHANGELOG_RANGE="$PREVIOUS_TAG..HEAD"
+          else
+            echo "No previous tag found, using all commits"
+            CHANGELOG_RANGE="HEAD"
+          fi
+          
+          # Generate changelog from git commits
+          echo "## 🚀 Pingu $VERSION" > release_notes.md
+          echo "" >> release_notes.md
+          echo "A modern ping utility with beautiful CLI output and comprehensive network analysis." >> release_notes.md
+          echo "" >> release_notes.md
+          
+          # Add What's Changed section
+          echo "### 🔄 What's Changed" >> release_notes.md
+          echo "" >> release_notes.md
+          
+          # Get commits since last tag with better formatting
+          git log $CHANGELOG_RANGE --pretty=format:"- %s" --reverse >> release_notes.md || echo "- Initial release" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "" >> release_notes.md
+          
+          # Add installation instructions
+          cat >> release_notes.md << 'INSTALL_EOF'
           ### 📦 Installation
+          
+          **One-line installer (recommended):**
+          ```bash
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | sh
+          ```
+          
+          **Manual Downloads:**
           
           **Linux x86_64:**
           ```bash
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-linux-amd64 -o pingu
+          curl -L https://github.com/${{ github.repository }}/releases/download/VERSION_PLACEHOLDER/pingu-linux-amd64 -o pingu
           chmod +x pingu && sudo mv pingu /usr/local/bin/
           ```
           
           **Linux ARM64:**
           ```bash
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-linux-arm64 -o pingu
+          curl -L https://github.com/${{ github.repository }}/releases/download/VERSION_PLACEHOLDER/pingu-linux-arm64 -o pingu
           chmod +x pingu && sudo mv pingu /usr/local/bin/
           ```
           
-          ### ✨ Features
-          
-          - 🎨 Beautiful terminal UI with brighter colors and responsive design
-          - 📊 Real-time network monitoring and analysis  
-          - 🔍 Comprehensive quality metrics and performance scoring
-          - 📱 Adaptive layouts for different terminal sizes
-          - 🌐 Improved error handling (continues on network errors)
-          - 📁 Export functionality for detailed analysis
-          - ⚡ Single binary with no dependencies
-          - 🎯 Fixed column alignment and removed duplicate information
-          
-          ### 🐧 Usage
-          
+          **macOS Intel (x86_64):**
           ```bash
-          # Basic ping
-          pingu google.com
-          
-          # Ping with options
-          pingu -c 10 --interval 2 --export 8.8.8.8
-          
-          # Enable line chart visualization
-          pingu --chart --count 20 google.com
-          
-          # Control display count
-          pingu --display 5 --count 50 1.1.1.1
+          curl -L https://github.com/${{ github.repository }}/releases/download/VERSION_PLACEHOLDER/pingu-macos-amd64 -o pingu
+          chmod +x pingu && sudo mv pingu /usr/local/bin/
           ```
           
-          ### 📋 Available Options
+          **macOS Apple Silicon (ARM64):**
+          ```bash
+          curl -L https://github.com/${{ github.repository }}/releases/download/VERSION_PLACEHOLDER/pingu-macos-arm64 -o pingu
+          chmod +x pingu && sudo mv pingu /usr/local/bin/
+          ```
           
-          - `-c, --count <NUMBER>`: Number of ping packets to send
-          - `-i, --interval <SECONDS>`: Interval between pings
-          - `-t, --timeout <SECONDS>`: Timeout for each ping
-          - `-s, --size <BYTES>`: Packet size
-          - `--export`: Export results to JSON file
-          - `--chart`: Enable line chart visualization
-          - `--display <NUMBER>`: Number of recent pings to display
+          **Windows x86_64:**
+          ```powershell
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/VERSION_PLACEHOLDER/pingu-windows-amd64.exe" -OutFile "pingu.exe"
+          ```
           
-          ### 🔧 Recent Improvements
+          ### ✨ Key Features
           
-          - **Enhanced usePing hook**: Extracted ping logic into reusable React hook
-          - **Brighter color scheme**: Updated gradients and colors for better visibility
-          - **Fixed column alignment**: Consistent spacing with min/max widths
-          - **Removed duplicates**: Cleaned up redundant success/error rate information
-          - **Better error handling**: Network errors no longer stop the ping process
-          - **Improved stability calculation**: Multi-factor network stability assessment
+          - 🎨 Beautiful terminal UI with responsive design and gradient colors
+          - 📊 Real-time network monitoring with live charts and animations
+          - 🔍 Comprehensive network analysis (jitter, packet loss, quality scoring)
+          - 📱 Adaptive layouts for different terminal sizes
+          - 🌐 Cross-platform support (Linux, macOS, Windows)
+          - 📁 Export results to JSON for further analysis
+          - ⚡ Single binary with no runtime dependencies
+          - 🎯 Advanced metrics and streak analysis
           
-          ---
+          ### 🐧 Quick Start
           
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/v0.0.0...${{ steps.version.outputs.VERSION }}
-          EOF
+          ```bash
+          # Basic usage
+          pingu google.com
+          
+          # Advanced options
+          pingu -c 20 --chart --export 8.8.8.8
+          
+          # View all options
+          pingu --help
+          ```
+          
+          INSTALL_EOF
+          
+          # Replace VERSION_PLACEHOLDER with actual version
+          sed -i "s/VERSION_PLACEHOLDER/$VERSION/g" release_notes.md
+          
+          # Add comparison link if we have a previous tag
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "" >> release_notes.md
+            echo "---" >> release_notes.md
+            echo "" >> release_notes.md
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...$VERSION" >> release_notes.md
+          else
+            echo "" >> release_notes.md
+            echo "---" >> release_notes.md
+            echo "" >> release_notes.md
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/commits/$VERSION" >> release_notes.md
+          fi
+          
+          echo "Generated changelog:"
+          cat release_notes.md
 
       - name: Install GitHub CLI
         run: |
@@ -180,8 +246,12 @@ jobs:
             echo "Creating release with binaries:"
             ls -la dist/
             
-            gh release create "${{ steps.version.outputs.VERSION }}" \
-              --title "Pingu ${{ steps.version.outputs.VERSION }}" \
+            # Extract version without refs prefix
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "Using version: $VERSION"
+            
+            gh release create "$VERSION" \
+              --title "Pingu $VERSION" \
               --notes-file release_notes.md \
               --repo ${{ github.repository }} \
               dist/pingu-* dist/checksums.txt
@@ -196,9 +266,11 @@ jobs:
 
       - name: Release Summary
         run: |
+          # Extract version without refs prefix
+          VERSION="${GITHUB_REF#refs/tags/}"
           echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Successfully created release **${{ steps.version.outputs.VERSION }}**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Successfully created release **$VERSION**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Built Binaries:" >> $GITHUB_STEP_SUMMARY
           for binary in dist/pingu-*; do
@@ -209,5 +281,5 @@ jobs:
           done
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Download:" >> $GITHUB_STEP_SUMMARY
-          echo "- [Release Page](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.VERSION }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release Page](https://github.com/${{ github.repository }}/releases/tag/$VERSION)" >> $GITHUB_STEP_SUMMARY
           echo "- [Latest Release](https://github.com/${{ github.repository }}/releases/latest)" >> $GITHUB_STEP_SUMMARY

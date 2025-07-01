@@ -156,7 +156,7 @@ case $OS in
     DISTRO_VERSION=$(lsb_release -sr 2>/dev/null || echo "")
     ;;
   Darwin*)
-    OS_NAME="darwin"
+    OS_NAME="macos"
     DISTRO="macOS"
     DISTRO_VERSION=$(sw_vers -productVersion 2>/dev/null || echo "")
     ;;
@@ -164,18 +164,8 @@ case $OS in
     OS_NAME="windows"
     DISTRO="Windows"
     ;;
-  OpenBSD*)
-    OS_NAME="openbsd"
-    DISTRO="OpenBSD"
-    DISTRO_VERSION=$(uname -r)
-    ;;
-  FreeBSD*)
-    OS_NAME="freebsd"
-    DISTRO="FreeBSD"
-    DISTRO_VERSION=$(uname -r)
-    ;;
   *)
-    error_exit "Unsupported operating system: $OS"
+    error_exit "Unsupported operating system: $OS (only Linux, macOS, and Windows are supported)"
     ;;
 esac
 
@@ -183,22 +173,14 @@ esac
 case $ARCH in
   x86_64|amd64)
     ARCH_NAME="amd64"
-    ARCH_DISPLAY="64-bit"
+    ARCH_DISPLAY="64-bit (x86_64)"
     ;;
   arm64|aarch64)
     ARCH_NAME="arm64"
-    ARCH_DISPLAY="ARM64"
-    ;;
-  armv7l|armv6l)
-    ARCH_NAME="arm"
-    ARCH_DISPLAY="ARM"
-    ;;
-  i386|i686)
-    ARCH_NAME="386"
-    ARCH_DISPLAY="32-bit"
+    ARCH_DISPLAY="ARM64 (AArch64)"
     ;;
   *)
-    error_exit "Unsupported architecture: $ARCH"
+    error_exit "Unsupported architecture: $ARCH (only x86_64/AMD64 and ARM64 are supported)"
     ;;
 esac
 

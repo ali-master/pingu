@@ -79,7 +79,7 @@ describe("LineChart", () => {
 
       expect(lastFrame()).toContain("chart:");
       // Narrow layout should show fewer dots (max 15)
-      const dots = (lastFrame().match(/[●×]/g) || []).length;
+      const dots = (lastFrame()?.match(/[●×]/g) || []).length;
       expect(dots).toBeLessThanOrEqual(15);
     });
 
@@ -89,7 +89,7 @@ describe("LineChart", () => {
 
       expect(lastFrame()).toContain("chart:");
       // Wide layout should show more dots (max 25)
-      const dots = (lastFrame().match(/[●×]/g) || []).length;
+      const dots = (lastFrame()?.match(/[●×]/g) || []).length;
       expect(dots).toBeLessThanOrEqual(25);
     });
 
@@ -100,14 +100,14 @@ describe("LineChart", () => {
       const { lastFrame: narrowFrame } = render(
         <LineChart entries={entries} layout={mockNarrowLayout} />,
       );
-      const narrowDots = (narrowFrame().match(/[●×]/g) || []).length;
+      const narrowDots = (narrowFrame()?.match(/[●×]/g) || []).length;
       expect(narrowDots).toBeLessThanOrEqual(15);
 
       // Wide layout should show more points
       const { lastFrame: wideFrame } = render(
         <LineChart entries={entries} layout={mockWideLayout} />,
       );
-      const wideDots = (wideFrame().match(/[●×]/g) || []).length;
+      const wideDots = (wideFrame()?.match(/[●×]/g) || []).length;
       expect(wideDots).toBeLessThanOrEqual(25);
     });
   });

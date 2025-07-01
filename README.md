@@ -43,49 +43,35 @@ curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/main/scripts/insta
 
 #### macOS
 ```bash
-# Apple Silicon (M1/M2)
-curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-darwin-arm64 -o pingu
+# Apple Silicon (M1/M2/M3/M4)
+curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-macos-arm64 -o pingu
 chmod +x pingu && sudo mv pingu /usr/local/bin/
 
-# Intel
-curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-darwin-amd64 -o pingu
+# Intel (x86_64)
+curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-macos-amd64 -o pingu
 chmod +x pingu && sudo mv pingu /usr/local/bin/
 ```
 
 #### Linux
 ```bash
-# x86_64
+# x86_64 (AMD64)
 curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-linux-amd64 -o pingu
 chmod +x pingu && sudo mv pingu /usr/local/bin/
 
-# ARM64
+# ARM64 (AArch64)
 curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-linux-arm64 -o pingu
-chmod +x pingu && sudo mv pingu /usr/local/bin/
-
-# ARM (32-bit)
-curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-linux-arm -o pingu
 chmod +x pingu && sudo mv pingu /usr/local/bin/
 ```
 
 #### Windows
 ```powershell
-# x86_64
+# x86_64 (Intel/AMD)
 Invoke-WebRequest -Uri "https://github.com/ali-master/pingu/releases/latest/download/pingu-windows-amd64.exe" -OutFile "pingu.exe"
 
-# ARM64
-Invoke-WebRequest -Uri "https://github.com/ali-master/pingu/releases/latest/download/pingu-windows-arm64.exe" -OutFile "pingu.exe"
+# Add to PATH (optional)
+$env:PATH += ";$PWD"
 ```
 
-#### OpenBSD
-```bash
-# x86_64
-curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-openbsd-amd64 -o pingu
-chmod +x pingu && doas mv pingu /usr/local/bin/
-
-# ARM64
-curl -L https://github.com/ali-master/pingu/releases/latest/download/pingu-openbsd-arm64 -o pingu
-chmod +x pingu && doas mv pingu /usr/local/bin/
-```
 
 ### Upgrading Pingu
 
