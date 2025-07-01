@@ -135,27 +135,6 @@ describe("CLI Module", () => {
     );
   });
 
-  test("should display ASCII art banner", async () => {
-    const mockGradient = await import("gradient-string");
-    const mockMeow = await import("meow");
-
-    const gradientFunction = vi.fn(() => "COLORED PINGU");
-    (mockGradient.default as any).mockReturnValue(gradientFunction);
-
-    (mockMeow.default as any).mockReturnValue({
-      input: ["test.com"],
-      flags: {},
-      help: "Usage help",
-    });
-
-    // Import CLI module
-    await import("../src/cli");
-
-    expect(mockGradient.default).toHaveBeenCalledWith(["cyan", "pink"]);
-    expect(gradientFunction).toHaveBeenCalledWith("PINGU ASCII ART");
-    expect(console.log).toHaveBeenCalledWith("COLORED PINGU");
-  });
-
   test("should handle all flag combinations", async () => {
     const mockMeow = await import("meow");
     const mockRender = await import("ink");

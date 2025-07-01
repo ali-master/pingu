@@ -72,7 +72,6 @@
     "@vitest/ui": "^3.2.4",
     "chalk": "^5.4.1",
     "cross-env": "^7.0.3",
-    "eslint-config-xo-react": "^0.28.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "ink-testing-library": "^4.0.0",
