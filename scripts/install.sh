@@ -2,6 +2,15 @@
 
 set -e
 
+# Portable echo function that works with both bash and sh
+echo_e() {
+    if [ "$BASH_VERSION" ]; then
+        echo -e "$@"
+    else
+        printf "%b\n" "$*"
+    fi
+}
+
 # Pingu installer script
 # Usage: curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh
 
@@ -27,17 +36,17 @@ PENGUIN="${BLUE}🐧${NC}"
 
 # Function to print colored output
 print_color() {
-    echo -e "$1$2${NC}"
+    echo_e "$1$2${NC}"
 }
 
 # Function to print step
 print_step() {
-    echo -e "${BOLD}$1${NC}"
+    echo_e "${BOLD}$1${NC}"
 }
 
 # Function to print error and exit
 error_exit() {
-    echo -e "${RED}${CROSS} Error: $1${NC}" >&2
+    echo_e "${RED}${CROSS} Error: $1${NC}" >&2
     exit 1
 }
 
@@ -77,20 +86,20 @@ download_with_progress() {
     
     # Show download information
     if [ -n "$size" ] && [ "$size" -gt 0 ]; then
-        echo -e "  ${BLUE}📥 Downloading Pingu ($(format_bytes "$size"))${NC}"
-        echo -e "  ${INFO} Expected size: ${GREEN}$(format_bytes "$size")${NC}"
+        echo_e "  ${BLUE}📥 Downloading Pingu ($(format_bytes "$size"))${NC}"
+        echo_e "  ${INFO} Expected size: ${GREEN}$(format_bytes "$size")${NC}"
     else
-        echo -e "  ${BLUE}📥 Downloading Pingu${NC}"
-        echo -e "  ${WARN} Size information not available"
+        echo_e "  ${BLUE}📥 Downloading Pingu${NC}"
+        echo_e "  ${WARN} Size information not available"
     fi
     
     # Show download details
-    echo -e "  ${INFO} Using $(command_exists curl && echo "curl" || echo "wget") for download"
+    echo_e "  ${INFO} Using $(command_exists curl && echo "curl" || echo "wget") for download"
     echo ""
     
     if command_exists curl; then
         # Use curl with detailed progress
-        echo -e "  ${DIM}Download Progress:${NC}"
+        echo_e "  ${DIM}Download Progress:${NC}"
         if ! curl -L --progress-bar \
              --connect-timeout 30 \
              --max-time 600 \
@@ -103,7 +112,7 @@ download_with_progress() {
         
     elif command_exists wget; then
         # Use wget with detailed progress
-        echo -e "  ${DIM}Download Progress:${NC}"
+        echo_e "  ${DIM}Download Progress:${NC}"
         if ! wget --show-progress \
              --progress=bar:force:noscroll \
              --timeout=30 \
@@ -123,10 +132,10 @@ download_with_progress() {
     actual_size=$(stat -f%z "$output" 2>/dev/null || stat -c%s "$output" 2>/dev/null || echo "0")
     
     if [ -n "$size" ] && [ "$size" -gt 0 ] && [ "$actual_size" -ne "$size" ]; then
-        echo -e "  ${WARN} Size mismatch: expected $(format_bytes "$size"), got $(format_bytes "$actual_size")"
+        echo_e "  ${WARN} Size mismatch: expected $(format_bytes "$size"), got $(format_bytes "$actual_size")"
     fi
     
-    echo -e "  ${CHECKMARK} Downloaded $(format_bytes "$actual_size")"
+    echo_e "  ${CHECKMARK} Downloaded $(format_bytes "$actual_size")"
 }
 
 # Function to detect package manager
@@ -150,7 +159,7 @@ detect_package_manager() {
 
 # ASCII Art Banner
 print_banner() {
-    echo -e "${CYAN}"
+    echo_e "${CYAN}"
     cat << "EOF"
     ____  _                   
    / __ \(_)___  ____ ___  __
@@ -159,8 +168,8 @@ print_banner() {
 /_/   /_/_/ /_/\__, /\__,_/  
               /____/         
 EOF
-    echo -e "${NC}"
-    echo -e "${DIM}Modern Network Diagnostics Tool${NC}"
+    echo_e "${NC}"
+    echo_e "${DIM}Modern Network Diagnostics Tool${NC}"
     echo ""
 }
 
@@ -170,7 +179,7 @@ print_banner
 
 # System Detection
 print_step "System Detection"
-echo -e "${INFO} Detecting system configuration..."
+echo_e "${INFO} Detecting system configuration..."
 
 # Detect OS
 OS="$(uname -s)"
@@ -214,15 +223,15 @@ case $ARCH in
 esac
 
 # Display system info
-echo -e "  ${CHECKMARK} Operating System: ${GREEN}${DISTRO} ${DISTRO_VERSION}${NC}"
-echo -e "  ${CHECKMARK} Architecture: ${GREEN}${ARCH_DISPLAY} (${ARCH})${NC}"
-echo -e "  ${CHECKMARK} Kernel: ${GREEN}${KERNEL}${NC}"
-echo -e "  ${CHECKMARK} Hostname: ${GREEN}${HOSTNAME}${NC}"
+echo_e "  ${CHECKMARK} Operating System: ${GREEN}${DISTRO} ${DISTRO_VERSION}${NC}"
+echo_e "  ${CHECKMARK} Architecture: ${GREEN}${ARCH_DISPLAY} (${ARCH})${NC}"
+echo_e "  ${CHECKMARK} Kernel: ${GREEN}${KERNEL}${NC}"
+echo_e "  ${CHECKMARK} Hostname: ${GREEN}${HOSTNAME}${NC}"
 
 # Package manager detection
 PKG_MANAGER=$(detect_package_manager)
 if [ "$PKG_MANAGER" != "unknown" ]; then
-    echo -e "  ${CHECKMARK} Package Manager: ${GREEN}${PKG_MANAGER}${NC}"
+    echo_e "  ${CHECKMARK} Package Manager: ${GREEN}${PKG_MANAGER}${NC}"
 fi
 echo ""
 
@@ -239,20 +248,20 @@ fi
 print_step "Checking Existing Installation"
 if command_exists pingu; then
     EXISTING_VERSION=$(pingu --version 2>/dev/null || echo "unknown")
-    echo -e "${WARN} Pingu is already installed (version: ${EXISTING_VERSION})"
+    echo_e "${WARN} Pingu is already installed (version: ${EXISTING_VERSION})"
     echo -n "Do you want to reinstall/upgrade? [y/N] "
     read -r response
     case "$response" in
         [yY][eE][sS]|[yY]) 
-            echo -e "${INFO} Proceeding with installation..."
+            echo_e "${INFO} Proceeding with installation..."
             ;;
         *)
-            echo -e "${INFO} Installation cancelled"
+            echo_e "${INFO} Installation cancelled"
             exit 0
             ;;
     esac
 else
-    echo -e "  ${CHECKMARK} No existing installation found"
+    echo_e "  ${CHECKMARK} No existing installation found"
 fi
 echo ""
 
@@ -265,35 +274,35 @@ fi
 
 # Check internet connectivity
 print_step "Network Check"
-echo -e "${INFO} Checking internet connectivity..."
+echo_e "${INFO} Checking internet connectivity..."
 if ! ping -c 1 github.com >/dev/null 2>&1; then
     if ! ping -c 1 8.8.8.8 >/dev/null 2>&1; then
         error_exit "No internet connection detected"
     else
-        echo -e "${WARN} Cannot reach github.com, but internet is available"
+        echo_e "${WARN} Cannot reach github.com, but internet is available"
     fi
 else
-    echo -e "  ${CHECKMARK} Internet connection verified"
+    echo_e "  ${CHECKMARK} Internet connection verified"
 fi
 echo ""
 
 # Create temporary directory
 print_step "Preparing Installation"
 TMP_DIR=$(mktemp -d)
-echo -e "  ${CHECKMARK} Created temporary directory: ${DIM}${TMP_DIR}${NC}"
+echo_e "  ${CHECKMARK} Created temporary directory: ${DIM}${TMP_DIR}${NC}"
 cd "$TMP_DIR"
 
 # Download binary with progress
 print_step "Downloading Pingu"
-echo -e "  ${INFO} Source: ${DIM}${DOWNLOAD_URL}${NC}"
-echo -e "  ${INFO} Target: ${DIM}${LOCAL_BINARY}${NC}"
+echo_e "  ${INFO} Source: ${DIM}${DOWNLOAD_URL}${NC}"
+echo_e "  ${INFO} Target: ${DIM}${LOCAL_BINARY}${NC}"
 echo ""
 
 if ! download_with_progress "$DOWNLOAD_URL" "$LOCAL_BINARY"; then
     rm -rf "$TMP_DIR"
     error_exit "Failed to download Pingu from $DOWNLOAD_URL"
 fi
-echo -e "  ${CHECKMARK} Download completed successfully"
+echo_e "  ${CHECKMARK} Download completed successfully"
 echo ""
 
 print_step "Verifying Download"
@@ -311,46 +320,46 @@ if [ "$FILE_SIZE" -eq 0 ]; then
 fi
 
 # Calculate checksums
-echo -e "  ${INFO} Calculating checksums..."
+echo_e "  ${INFO} Calculating checksums..."
 if command_exists sha256sum; then
     SHA256=$(sha256sum "$LOCAL_BINARY" | awk '{print $1}')
-    echo -e "  ${CHECKMARK} SHA256: ${DIM}${SHA256}${NC}"
+    echo_e "  ${CHECKMARK} SHA256: ${DIM}${SHA256}${NC}"
 elif command_exists shasum; then
     SHA256=$(shasum -a 256 "$LOCAL_BINARY" | awk '{print $1}')
-    echo -e "  ${CHECKMARK} SHA256: ${DIM}${SHA256}${NC}"
+    echo_e "  ${CHECKMARK} SHA256: ${DIM}${SHA256}${NC}"
 fi
 
 if command_exists md5sum; then
     MD5=$(md5sum "$LOCAL_BINARY" | awk '{print $1}')
-    echo -e "  ${CHECKMARK} MD5: ${DIM}${MD5}${NC}"
+    echo_e "  ${CHECKMARK} MD5: ${DIM}${MD5}${NC}"
 elif command_exists md5; then
     MD5=$(md5 -q "$LOCAL_BINARY")
-    echo -e "  ${CHECKMARK} MD5: ${DIM}${MD5}${NC}"
+    echo_e "  ${CHECKMARK} MD5: ${DIM}${MD5}${NC}"
 fi
 
 # File type detection
 if command_exists file; then
     FILE_TYPE=$(file "$LOCAL_BINARY")
-    echo -e "  ${CHECKMARK} File type: ${DIM}${FILE_TYPE}${NC}"
+    echo_e "  ${CHECKMARK} File type: ${DIM}${FILE_TYPE}${NC}"
 fi
 
 # File size verification
-echo -e "  ${CHECKMARK} File size: ${GREEN}$(format_bytes "$FILE_SIZE")${NC}"
+echo_e "  ${CHECKMARK} File size: ${GREEN}$(format_bytes "$FILE_SIZE")${NC}"
 
 # Verify it's executable
 if file "$LOCAL_BINARY" | grep -q "executable"; then
-    echo -e "  ${CHECKMARK} Executable format verified"
+    echo_e "  ${CHECKMARK} Executable format verified"
 else
-    echo -e "  ${WARN} Warning: File may not be executable format"
+    echo_e "  ${WARN} Warning: File may not be executable format"
 fi
 
 # Make executable
 chmod +x "$LOCAL_BINARY"
-echo -e "  ${CHECKMARK} Execute permissions set"
+echo_e "  ${CHECKMARK} Execute permissions set"
 
 # Final verification
 if [ -x "$LOCAL_BINARY" ]; then
-    echo -e "  ${CHECKMARK} Binary is ready for installation"
+    echo_e "  ${CHECKMARK} Binary is ready for installation"
 else
     error_exit "Failed to set execute permissions"
 fi
@@ -365,19 +374,19 @@ if [ "$OS_NAME" = "windows" ]; then
   mv "$LOCAL_BINARY" "$INSTALL_DIR/pingu.exe"
   INSTALL_PATH="$INSTALL_DIR/pingu.exe"
   
-  echo -e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
-  echo -e "  ${INFO} Add ${GREEN}$INSTALL_DIR${NC} to your PATH environment variable"
+  echo_e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
+  echo_e "  ${INFO} Add ${GREEN}$INSTALL_DIR${NC} to your PATH environment variable"
   
 else
   # For Unix-like systems
   if [ -w "/usr/local/bin" ] || [ "$EUID" = "0" ]; then
     INSTALL_PATH="/usr/local/bin/pingu"
     if [ -f "$INSTALL_PATH" ]; then
-        echo -e "  ${INFO} Backing up existing binary..."
+        echo_e "  ${INFO} Backing up existing binary..."
         mv "$INSTALL_PATH" "$INSTALL_PATH.backup.$(date +%Y%m%d%H%M%S)"
     fi
     mv "$LOCAL_BINARY" "$INSTALL_PATH"
-    echo -e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
+    echo_e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
   else
     # Install to user's bin directory
     INSTALL_DIR="$HOME/.local/bin"
@@ -385,21 +394,21 @@ else
     INSTALL_PATH="$INSTALL_DIR/pingu"
     
     if [ -f "$INSTALL_PATH" ]; then
-        echo -e "  ${INFO} Backing up existing binary..."
+        echo_e "  ${INFO} Backing up existing binary..."
         mv "$INSTALL_PATH" "$INSTALL_PATH.backup.$(date +%Y%m%d%H%M%S)"
     fi
     
     mv "$LOCAL_BINARY" "$INSTALL_PATH"
-    echo -e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
+    echo_e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
     
     # Check if directory is in PATH
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
-        echo -e "  ${WARN} ${YELLOW}$INSTALL_DIR is not in your PATH${NC}"
+        echo_e "  ${WARN} ${YELLOW}$INSTALL_DIR is not in your PATH${NC}"
         echo ""
-        echo -e "  Add this line to your shell configuration file:"
-        echo -e "  ${DIM}(.bashrc, .zshrc, .profile, etc.)${NC}"
+        echo_e "  Add this line to your shell configuration file:"
+        echo_e "  ${DIM}(.bashrc, .zshrc, .profile, etc.)${NC}"
         echo ""
-        echo -e "  ${CYAN}export PATH=\"\$PATH:$INSTALL_DIR\"${NC}"
+        echo_e "  ${CYAN}export PATH=\"\$PATH:$INSTALL_DIR\"${NC}"
         echo ""
     fi
   fi
@@ -414,11 +423,11 @@ echo ""
 print_step "Verification"
 if command_exists pingu; then
     VERSION_OUTPUT=$(pingu --version 2>/dev/null || echo "Version check failed")
-    echo -e "  ${CHECKMARK} Pingu is ready to use!"
-    echo -e "  ${INFO} Version: ${VERSION_OUTPUT}"
+    echo_e "  ${CHECKMARK} Pingu is ready to use!"
+    echo_e "  ${INFO} Version: ${VERSION_OUTPUT}"
 else
-    echo -e "  ${WARN} Pingu was installed but is not in PATH"
-    echo -e "  ${INFO} Binary location: ${GREEN}$INSTALL_PATH${NC}"
+    echo_e "  ${WARN} Pingu was installed but is not in PATH"
+    echo_e "  ${INFO} Binary location: ${GREEN}$INSTALL_PATH${NC}"
 fi
 echo ""
 
@@ -431,66 +440,66 @@ echo ""
 # Usage examples
 print_step "Quick Start Guide"
 echo ""
-echo -e "${BOLD}Basic Usage:${NC}"
-echo -e "  ${DIM}# Ping a domain${NC}"
-echo -e "  ${CYAN}pingu google.com${NC}"
+echo_e "${BOLD}Basic Usage:${NC}"
+echo_e "  ${DIM}# Ping a domain${NC}"
+echo_e "  ${CYAN}pingu google.com${NC}"
 echo ""
-echo -e "  ${DIM}# Ping an IP address${NC}"
-echo -e "  ${CYAN}pingu 8.8.8.8${NC}"
-echo ""
-
-echo -e "${BOLD}Advanced Options:${NC}"
-echo -e "  ${DIM}# Send specific number of packets${NC}"
-echo -e "  ${CYAN}pingu -c 10 google.com${NC}"
-echo ""
-echo -e "  ${DIM}# Set packet interval (seconds)${NC}"
-echo -e "  ${CYAN}pingu -i 0.5 google.com${NC}"
-echo ""
-echo -e "  ${DIM}# Set timeout (seconds)${NC}"
-echo -e "  ${CYAN}pingu -t 10 google.com${NC}"
-echo ""
-echo -e "  ${DIM}# Export results to JSON${NC}"
-echo -e "  ${CYAN}pingu -e google.com${NC}"
-echo ""
-echo -e "  ${DIM}# Combine multiple options${NC}"
-echo -e "  ${CYAN}pingu -c 20 -i 0.2 -t 5 google.com${NC}"
+echo_e "  ${DIM}# Ping an IP address${NC}"
+echo_e "  ${CYAN}pingu 8.8.8.8${NC}"
 echo ""
 
-echo -e "${BOLD}Real-World Examples:${NC}"
-echo -e "  ${DIM}# Monitor your home network${NC}"
-echo -e "  ${CYAN}pingu 192.168.1.1${NC}"
+echo_e "${BOLD}Advanced Options:${NC}"
+echo_e "  ${DIM}# Send specific number of packets${NC}"
+echo_e "  ${CYAN}pingu -c 10 google.com${NC}"
 echo ""
-echo -e "  ${DIM}# Test DNS servers${NC}"
-echo -e "  ${CYAN}pingu 1.1.1.1  # Cloudflare${NC}"
-echo -e "  ${CYAN}pingu 8.8.8.8  # Google${NC}"
+echo_e "  ${DIM}# Set packet interval (seconds)${NC}"
+echo_e "  ${CYAN}pingu -i 0.5 google.com${NC}"
 echo ""
-echo -e "  ${DIM}# Continuous monitoring with export${NC}"
-echo -e "  ${CYAN}pingu -e your-server.com${NC}"
+echo_e "  ${DIM}# Set timeout (seconds)${NC}"
+echo_e "  ${CYAN}pingu -t 10 google.com${NC}"
 echo ""
-
-echo -e "${BOLD}Features:${NC}"
-echo -e "  ${CHECKMARK} Real-time network quality analysis"
-echo -e "  ${CHECKMARK} Beautiful terminal UI with live graphs"
-echo -e "  ${CHECKMARK} Cross-platform support"
-echo -e "  ${CHECKMARK} Export results to JSON"
-echo -e "  ${CHECKMARK} Advanced network metrics (jitter, packet loss, etc.)"
+echo_e "  ${DIM}# Export results to JSON${NC}"
+echo_e "  ${CYAN}pingu -e google.com${NC}"
+echo ""
+echo_e "  ${DIM}# Combine multiple options${NC}"
+echo_e "  ${CYAN}pingu -c 20 -i 0.2 -t 5 google.com${NC}"
 echo ""
 
-echo -e "${BOLD}Resources:${NC}"
-echo -e "  ${INFO} Documentation: ${BLUE}https://github.com/${REPO}${NC}"
-echo -e "  ${INFO} Report Issues: ${BLUE}https://github.com/${REPO}/issues${NC}"
-echo -e "  ${INFO} View Help: ${CYAN}pingu --help${NC}"
+echo_e "${BOLD}Real-World Examples:${NC}"
+echo_e "  ${DIM}# Monitor your home network${NC}"
+echo_e "  ${CYAN}pingu 192.168.1.1${NC}"
+echo ""
+echo_e "  ${DIM}# Test DNS servers${NC}"
+echo_e "  ${CYAN}pingu 1.1.1.1  # Cloudflare${NC}"
+echo_e "  ${CYAN}pingu 8.8.8.8  # Google${NC}"
+echo ""
+echo_e "  ${DIM}# Continuous monitoring with export${NC}"
+echo_e "  ${CYAN}pingu -e your-server.com${NC}"
+echo ""
+
+echo_e "${BOLD}Features:${NC}"
+echo_e "  ${CHECKMARK} Real-time network quality analysis"
+echo_e "  ${CHECKMARK} Beautiful terminal UI with live graphs"
+echo_e "  ${CHECKMARK} Cross-platform support"
+echo_e "  ${CHECKMARK} Export results to JSON"
+echo_e "  ${CHECKMARK} Advanced network metrics (jitter, packet loss, etc.)"
+echo ""
+
+echo_e "${BOLD}Resources:${NC}"
+echo_e "  ${INFO} Documentation: ${BLUE}https://github.com/${REPO}${NC}"
+echo_e "  ${INFO} Report Issues: ${BLUE}https://github.com/${REPO}/issues${NC}"
+echo_e "  ${INFO} View Help: ${CYAN}pingu --help${NC}"
 echo ""
 
 # System-specific notes
 if [ "$OS_NAME" = "darwin" ]; then
-    echo -e "${BOLD}macOS Note:${NC}"
-    echo -e "  ${INFO} You may need to allow Pingu in System Preferences > Security & Privacy"
+    echo_e "${BOLD}macOS Note:${NC}"
+    echo_e "  ${INFO} You may need to allow Pingu in System Preferences > Security & Privacy"
     echo ""
 elif [ "$OS_NAME" = "windows" ]; then
-    echo -e "${BOLD}Windows Note:${NC}"
-    echo -e "  ${INFO} Run as Administrator for best results"
-    echo -e "  ${INFO} Windows Defender may need to allow the application"
+    echo_e "${BOLD}Windows Note:${NC}"
+    echo_e "  ${INFO} Run as Administrator for best results"
+    echo_e "  ${INFO} Windows Defender may need to allow the application"
     echo ""
 fi
 
