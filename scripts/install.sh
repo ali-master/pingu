@@ -278,15 +278,20 @@ if command_exists pingu; then
     else
         printf "Do you want to reinstall/upgrade? [y/N] "
         
-        # Handle non-interactive mode (when piped)
+        # Read user response
         if [ -t 0 ]; then
-            # Interactive mode - read from terminal
+            # Terminal is available, read normally
             read -r response
         else
-            # Non-interactive mode - assume yes for upgrades
-            echo "y"
-            echo_e "${INFO} Non-interactive mode detected. Auto-proceeding with upgrade..."
-            response="y"
+            # No terminal (piped), exit with instructions
+            echo ""
+            echo_e "${INFO} Non-interactive mode detected."
+            echo_e "${INFO} To upgrade in non-interactive mode, use:"
+            echo_e ""
+            echo_e "  ${CYAN}curl -fsSL ... | sh -s -- --force${NC}"
+            echo_e ""
+            echo_e "${INFO} Installation cancelled"
+            exit 0
         fi
         
         case "$response" in
