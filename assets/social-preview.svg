@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="terminalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:0.95"/>
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:0.95"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#backgroundGradient)"/>
+
+  <!-- Animated network grid background -->
+  <g opacity="0.1" stroke="#ffffff" stroke-width="1" fill="none">
+    <defs>
+      <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+        <path d="M 80 0 L 0 0 0 80" stroke="#ffffff" stroke-width="1" fill="none"/>
+      </pattern>
+    </defs>
+    <rect width="1280" height="640" fill="url(#grid)"/>
+  </g>
+
+  <!-- Logo Section (Left) -->
+  <g transform="translate(120, 180)">
+    <!-- Main penguin logo -->
+    <circle cx="0" cy="0" r="100" fill="url(#terminalGradient)" filter="url(#softGlow)"/>
+
+    <!-- Penguin silhouette -->
+    <g fill="#00d4ff" filter="url(#glow)">
+      <ellipse cx="0" cy="10" rx="35" ry="50"/>
+      <circle cx="0" cy="-35" r="30"/>
+      <ellipse cx="0" cy="15" rx="22" ry="35" fill="#ffffff"/>
+
+      <!-- Eyes -->
+      <circle cx="-12" cy="-40" r="4" fill="#ffffff"/>
+      <circle cx="12" cy="-40" r="4" fill="#ffffff"/>
+      <circle cx="-12" cy="-38" r="2" fill="#1a1a2e"/>
+      <circle cx="12" cy="-38" r="2" fill="#1a1a2e"/>
+
+      <!-- Beak -->
+      <polygon points="0,-25 -6,-18 6,-18" fill="#ff6b35"/>
+
+      <!-- Wings -->
+      <ellipse cx="-28" cy="5" rx="12" ry="28" fill="#0099cc"/>
+      <ellipse cx="28" cy="5" rx="12" ry="28" fill="#0099cc"/>
+    </g>
+
+    <!-- Animated ping waves around logo -->
+    <g opacity="0.5">
+      <circle cx="0" cy="0" r="120" fill="none" stroke="#00d4ff" stroke-width="2" stroke-dasharray="10,5">
+        <animate attributeName="r" values="120;140;120" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="0" cy="0" r="90" fill="none" stroke="#ff6b9d" stroke-width="2" stroke-dasharray="5,5">
+        <animate attributeName="r" values="90;110;90" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;0.3;0.7" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+
+  <!-- Title and Description (Center-Right) -->
+  <g transform="translate(300, 160)">
+    <!-- Main title -->
+    <text x="0" y="0" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="72" font-weight="900" fill="#ffffff" filter="url(#glow)">PINGU
+    </text>
+
+    <!-- Subtitle -->
+    <text x="0" y="50" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="28" font-weight="600" fill="#ffffff" opacity="0.9">
+      Modern Network Diagnostics CLI
+    </text>
+
+    <!-- Description -->
+    <text x="0" y="90" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="18" font-weight="400" fill="#ffffff" opacity="0.7">
+      Beautiful ping analyzer with real-time monitoring,
+    </text>
+    <text x="0" y="115" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="18" font-weight="400" fill="#ffffff" opacity="0.7">
+      comprehensive network quality metrics, and responsive UI
+    </text>
+
+    <!-- Features list -->
+    <g transform="translate(0, 160)">
+      <g>
+        <circle cx="0" cy="0" r="4" fill="#00ff88"/>
+        <text x="20" y="6" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+              font-size="16" font-weight="500" fill="#ffffff" opacity="0.8">
+          Real-time ping monitoring with beautiful Ink UI
+        </text>
+      </g>
+      <g transform="translate(0, 35)">
+        <circle cx="0" cy="0" r="4" fill="#ff6b9d"/>
+        <text x="20" y="6" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+              font-size="16" font-weight="500" fill="#ffffff" opacity="0.8">
+          Comprehensive network quality analysis and metrics
+        </text>
+      </g>
+      <g transform="translate(0, 70)">
+        <circle cx="0" cy="0" r="4" fill="#00d4ff"/>
+        <text x="20" y="6" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+              font-size="16" font-weight="500" fill="#ffffff" opacity="0.8">
+          Cross-platform support with responsive terminal UI
+        </text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Terminal Preview (Bottom Right) -->
+  <g transform="translate(750, 300)">
+    <!-- Terminal window -->
+    <rect x="0" y="0" width="480" height="240" rx="12" fill="url(#terminalGradient)" filter="url(#glow)"/>
+
+    <!-- Terminal header -->
+    <rect x="0" y="0" width="480" height="30" rx="12" fill="#2a2a3e"/>
+    <circle cx="20" cy="15" r="5" fill="#ff5f57"/>
+    <circle cx="40" cy="15" r="5" fill="#ffbd2e"/>
+    <circle cx="60" cy="15" r="5" fill="#28ca42"/>
+
+    <!-- Terminal content -->
+    <g transform="translate(20, 50)"
+       font-family="'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace">
+      <!-- Command line -->
+      <text x="0" y="0" font-size="14" fill="#00ff88">$ pingu google.com</text>
+
+      <!-- Output -->
+      <text x="0" y="25" font-size="12" fill="#ffffff" opacity="0.9">🐧 PINGU → google.com ✅ Complete ⏱️ 2m 14s</text>
+
+      <!-- Live feed section -->
+      <text x="0" y="50" font-size="12" fill="#00d4ff" font-weight="600">📡 Live Feed</text>
+      <text x="0" y="70" font-size="11" fill="#00ff88">#001 🟢 24ms TTL=56</text>
+      <text x="0" y="85" font-size="11" fill="#00ff88">#002 🟢 23ms TTL=56</text>
+      <text x="0" y="100" font-size="11" fill="#00ff88">#003 🟢 25ms TTL=56</text>
+
+      <!-- Stats section -->
+      <text x="0" y="125" font-size="12" fill="#00d4ff" font-weight="600">📊 Quick Statistics</text>
+      <text x="0" y="145" font-size="11" fill="#ffffff" opacity="0.8">Total Packets: 156 Successful: 156</text>
+      <text x="0" y="160" font-size="11" fill="#ffffff" opacity="0.8">Failed: 0 Packet Loss: 0.0%</text>
+
+      <!-- Progress bars -->
+      <text x="0" y="185" font-size="12" fill="#00d4ff" font-weight="600">📈 Performance</text>
+      <rect x="0" y="195" width="200" height="4" rx="2" fill="#333" opacity="0.5"/>
+      <rect x="0" y="195" width="200" height="4" rx="2" fill="#00ff88"/>
+    </g>
+  </g>
+
+  <!-- Floating network elements -->
+  <g opacity="0.4">
+    <!-- Data packets -->
+    <g transform="translate(300, 100)">
+      <rect x="0" y="0" width="12" height="8" rx="2" fill="#00ff88">
+        <animateTransform attributeName="transform" type="translate"
+                          values="0,0; 50,30; 100,0; 0,0" dur="6s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <g transform="translate(900, 100)">
+      <circle cx="0" cy="0" r="4" fill="#ff6b9d">
+        <animateTransform attributeName="transform" type="translate"
+                          values="0,0; -60,40; -120,0; 0,0" dur="8s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Signal indicators -->
+    <g transform="translate(200, 500)">
+      <circle cx="0" cy="0" r="3" fill="#00d4ff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    <g transform="translate(1050, 200)">
+      <circle cx="0" cy="0" r="3" fill="#ff6b35">
+        <animate attributeName="opacity" values="1;0.4;1" dur="3s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+
+  <!-- GitHub and Installation hint -->
+  <g transform="translate(640, 580)">
+    <text x="0" y="0" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="14" font-weight="600" fill="#ffffff" opacity="0.7">
+      github.com/ali-master/pingu
+    </text>
+    <text x="0" y="25" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="12" font-weight="400" fill="#ffffff" opacity="0.5">
+      curl -fsSL https://get.pingu.dev | sh
+    </text>
+  </g>
+</svg>

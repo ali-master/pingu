@@ -1,0 +1,14 @@
+{
+  "extends": "@sindresorhus/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "noUncheckedIndexedAccess": false,
+    "allowImportingTsExtensions": false,
+    "allowArbitraryExtensions": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "moduleResolution": "bundler",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src"]
+}
