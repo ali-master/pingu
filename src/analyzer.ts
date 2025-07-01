@@ -75,7 +75,14 @@ export function analyzePingResult(
   );
 
   const networkQualityText = getNetworkQualityText(networkQualityScore);
-  const isStable = consistency >= stabilityThreshold;
+
+  // Improved stability calculation considering multiple factors
+  const packetLossRate = (failedPackets / totalPackets) * 100;
+  const isStable =
+    packetLossRate <= 5 && // Less than 5% packet loss
+    (consistency >= 60 || (jitter !== null && jitter <= 100)) && // Reasonable consistency OR low jitter
+    streakStats.longestFailure <= Math.max(2, totalPackets * 0.1); // Failure streaks are short
+
   const recommendedAction = generateRecommendation(networkQualityScore, isStable, errorStats);
 
   // Calculate specific rates

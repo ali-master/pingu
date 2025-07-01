@@ -10,7 +10,7 @@ export interface SectionHeaderProps {
 export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, icon, compact = false }) => (
   <Box gap={1} marginTop={compact ? 0 : 1}>
     <Text bold color="cyan">
-      {icon}
+      {icon}{" "}
     </Text>
     <Text bold color="white">
       {compact ? title.slice(0, 12) : title}

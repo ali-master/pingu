@@ -3,7 +3,7 @@ import { Box } from "ink";
 import type { ResponsiveLayout } from "./dual-progress-bars";
 
 export interface MetricsGridProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   layout: ResponsiveLayout;
 }
 

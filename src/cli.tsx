@@ -26,6 +26,8 @@ const cli = meow(
 
 	Options
 		--count, -c       Number of ping packets to send (default: unlimited)
+		--chart, -ch      Display chart (default: false)
+		--display, -d     Number of ping packets to display (default: 8)
 		--interval, -i    Wait interval seconds between sending each packet (default: 1)
 		--timeout, -t     Time to wait for a response, in seconds (default: 5)
 		--size, -s        Number of data bytes to be sent (default: 56)
@@ -39,9 +41,19 @@ const cli = meow(
   {
     importMeta: import.meta,
     flags: {
+      display: {
+        type: "number",
+        shortFlag: "d",
+        default: 8,
+      },
       count: {
         type: "number",
         shortFlag: "c",
+      },
+      chart: {
+        type: "boolean",
+        shortFlag: "ch",
+        default: false,
       },
       interval: {
         type: "number",

@@ -6,6 +6,7 @@
     "allowImportingTsExtensions": false,
     "allowArbitraryExtensions": false,
     "noPropertyAccessFromIndexSignature": false,
+    "module": "esnext",
     "moduleResolution": "bundler",
     "noUnusedLocals": false,
     "noUnusedParameters": false
