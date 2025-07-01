@@ -58,7 +58,7 @@ export function parsePingLine(line: string): PingEntry | null {
  */
 function isNonPingLine(line: string): boolean {
   const skipPatterns = [
-    /^PING\s/i,
+    /^PING\s.*\s+data$|^PING\s.*\s+bytes$/i, // Header lines that end with "data" or "bytes" (not response lines)
     /^---.*ping\s+statistics/i,
     /^\d+\s+packets\s+transmitted/i,
     /^round-trip/i,
@@ -69,6 +69,11 @@ function isNonPingLine(line: string): boolean {
     /^\s*$/,
     /^\^C$/, // Control-C interrupt signal
   ];
+
+  // Don't skip lines that contain time measurements even if they start with PING
+  if (line.match(/time[=<]?\s*[\d.]+\s*ms/i)) {
+    return false;
+  }
 
   return skipPatterns.some((pattern) => pattern.test(line));
 }
@@ -83,8 +88,9 @@ function parseSuccessfulPing(line: string): {
   sourceIp: string | null;
 } | null {
   // Unix/Linux format: "64 bytes from 8.8.8.8: icmp_seq=6521 ttl=117 time=220.874 ms"
+  // Also handles IPv6: "64 bytes from 2001:4860:4860::8888: icmp_seq=1 ttl=117 time=25.123 ms"
   const unixMatch = line.match(
-    /(\d+)\s+bytes\s+from\s+([\d.]+):\s+icmp_seq=(\d+)\s+ttl=(\d+)\s+time=([\d.]+)\s*ms/i,
+    /(\d+)\s+bytes\s+from\s+([\d.:a-f]+):\s+icmp_seq[=:](\d+)\s+ttl[=:](\d+)\s+time[=:]\s*([\d.]+)\s*ms/i,
   );
 
   if (unixMatch) {
@@ -111,7 +117,7 @@ function parseSuccessfulPing(line: string): {
   }
 
   // Alternative time extraction for various formats
-  const timeMatch = line.match(/time[=<]?\s*([\d.]+)\s*ms/i);
+  const timeMatch = line.match(/time[=<:]?\s*([\d.]+)\s*ms/i);
   if (timeMatch) {
     const sourceIp = extractSourceIp(line);
     const ttlMatch = line.match(/ttl[=:]\s*(\d+)/i);
