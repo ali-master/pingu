@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 // Mock dependencies
 vi.mock("react", () => ({
   default: {
-    createElement: vi.fn(),
+    createElement: vi.fn((type, props) => ({ type, props })),
   },
 }));
 
@@ -25,7 +25,7 @@ vi.mock("gradient-string", () => ({
   default: vi.fn(() => vi.fn(() => "COLORED PINGU")),
 }));
 
-vi.mock("../src/app.js", () => ({
+vi.mock("../src/app", () => ({
   default: vi.fn(),
 }));
 
@@ -111,7 +111,7 @@ describe("CLI Module", () => {
   test("should render App component when host is provided", async () => {
     const mockMeow = await import("meow");
     const mockRender = await import("ink");
-    const mockApp = await import("../src/app.js");
+    const mockApp = await import("../src/app");
 
     (mockMeow.default as any).mockReturnValue({
       input: ["example.com"],
