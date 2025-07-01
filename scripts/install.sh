@@ -10,9 +10,23 @@ echo_e() {
 
 # Pingu installer script
 # Usage: curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh
+# Force reinstall: curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh -s -- --force
 
 REPO="ali-master/pingu"
 VERSION="latest"
+FORCE_INSTALL=false
+
+# Parse command line arguments
+for arg in "$@"; do
+    case $arg in
+        -f|--force)
+            FORCE_INSTALL=true
+            shift
+            ;;
+        *)
+            ;;
+    esac
+done
 
 # Colors for output
 RED='\033[0;31m'
@@ -95,14 +109,18 @@ download_with_progress() {
     echo ""
     
     if command_exists curl; then
-        # Use curl with detailed progress
+        # Use curl with detailed progress including speed
         echo_e "  ${DIM}Download Progress:${NC}"
-        if ! curl -L --progress-bar \
+        if ! curl -L \
+             --progress-bar \
+             --speed-time 5 \
+             --speed-limit 1 \
              --connect-timeout 30 \
              --max-time 600 \
              --retry 3 \
              --retry-delay 2 \
              --user-agent "Pingu-Installer/1.0" \
+             -w "\n  ${INFO} Average download speed: ${GREEN}%{speed_download}${NC} bytes/sec\n" \
              "$url" -o "$output"; then
             return 1
         fi
@@ -116,7 +134,14 @@ download_with_progress() {
              --tries=3 \
              --waitretry=2 \
              --user-agent="Pingu-Installer/1.0" \
-             "$url" -O "$output"; then
+             "$url" -O "$output" 2>&1 | while IFS= read -r line; do
+                 # Extract and display speed from wget output
+                 if echo "$line" | grep -q "K/s\|M/s"; then
+                     speed=$(echo "$line" | grep -oE '[0-9.]+[KM]/s' | tail -1)
+                     printf "\r  ${INFO} Download speed: ${GREEN}%s${NC}    " "$speed"
+                 fi
+                 echo "$line"
+             done; then
             return 1
         fi
         
@@ -245,27 +270,61 @@ fi
 print_step "Checking Existing Installation"
 if command_exists pingu; then
     EXISTING_VERSION=$(pingu --version 2>/dev/null || echo "unknown")
-    echo_e "${WARN} Pingu is already installed (version: ${EXISTING_VERSION})"
-    echo -n "Do you want to reinstall/upgrade? [y/N] "
-    read -r response
-    case "$response" in
-        [yY][eE][sS]|[yY]) 
-            echo_e "${INFO} Proceeding with installation..."
-            ;;
-        *)
-            echo_e "${INFO} Installation cancelled"
-            exit 0
-            ;;
-    esac
+    echo_e "${WARN} Pingu is already installed"
+    echo_e "  ${INFO} Current version: ${YELLOW}${EXISTING_VERSION}${NC}"
+    
+    if [ "$FORCE_INSTALL" = "true" ]; then
+        echo_e "${INFO} Force flag detected. Proceeding with installation..."
+    else
+        printf "Do you want to reinstall/upgrade? [y/N] "
+        
+        # Handle non-interactive mode (when piped)
+        if [ -t 0 ]; then
+            # Interactive mode - read from terminal
+            read -r response
+        else
+            # Non-interactive mode - assume yes for upgrades
+            echo "y"
+            echo_e "${INFO} Non-interactive mode detected. Auto-proceeding with upgrade..."
+            response="y"
+        fi
+        
+        case "$response" in
+            [yY][eE][sS]|[yY]) 
+                echo_e "${INFO} Proceeding with installation..."
+                ;;
+            *)
+                echo_e "${INFO} Installation cancelled"
+                echo_e "${DIM}Tip: Use --force flag to skip this prompt${NC}"
+                exit 0
+                ;;
+        esac
+    fi
 else
     echo_e "  ${CHECKMARK} No existing installation found"
 fi
 echo ""
 
-# Download URL
+# Download URL and version detection
 if [ "$VERSION" = "latest" ]; then
+  # Get latest version tag from GitHub
+  echo_e "${INFO} Checking latest version..."
+  if command_exists curl; then
+    LATEST_VERSION=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+  elif command_exists wget; then
+    LATEST_VERSION=$(wget -qO- "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+  fi
+  
+  if [ -n "$LATEST_VERSION" ]; then
+    echo_e "  ${CHECKMARK} Latest version: ${GREEN}${LATEST_VERSION}${NC}"
+  else
+    echo_e "  ${WARN} Could not detect latest version, proceeding anyway..."
+    LATEST_VERSION="latest"
+  fi
+  
   DOWNLOAD_URL="https://github.com/${REPO}/releases/latest/download/${BINARY_NAME}"
 else
+  LATEST_VERSION="$VERSION"
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${BINARY_NAME}"
 fi
 
@@ -419,9 +478,14 @@ echo ""
 # Verify installation
 print_step "Verification"
 if command_exists pingu; then
-    VERSION_OUTPUT=$(pingu --version 2>/dev/null || echo "Version check failed")
+    NEW_VERSION=$(pingu --version 2>/dev/null || echo "Version check failed")
     echo_e "  ${CHECKMARK} Pingu is ready to use!"
-    echo_e "  ${INFO} Version: ${VERSION_OUTPUT}"
+    
+    if [ -n "$EXISTING_VERSION" ] && [ "$EXISTING_VERSION" != "unknown" ]; then
+        echo_e "  ${INFO} Upgraded from: ${YELLOW}${EXISTING_VERSION}${NC} → ${GREEN}${NEW_VERSION}${NC}"
+    else
+        echo_e "  ${INFO} Installed version: ${GREEN}${NEW_VERSION}${NC}"
+    fi
 else
     echo_e "  ${WARN} Pingu was installed but is not in PATH"
     echo_e "  ${INFO} Binary location: ${GREEN}$INSTALL_PATH${NC}"

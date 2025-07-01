@@ -35,9 +35,12 @@
 ```bash
 # Install latest version for your platform (auto-detects OS/arch)
 curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh
+
+# Force reinstall/upgrade without prompts
+curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh -s -- --force
 ```
 
-> **Note**: The installer automatically detects your operating system and CPU architecture, downloads the appropriate binary, and installs it to your system. It will try to install to `/usr/local/bin` (with sudo if needed) or fall back to `~/bin`.
+> **Note**: The installer automatically detects your operating system and CPU architecture, downloads the appropriate binary, and installs it to your system. It will try to install to `/usr/local/bin` (with sudo if needed) or fall back to `~/.local/bin`. When run non-interactively (piped), it will automatically proceed with upgrades.
 
 ### Platform-specific Downloads
 

@@ -5,6 +5,7 @@ import { render } from "ink";
 import meow from "meow";
 import App from "./app";
 import { generateCompletion, printCompletionHelp } from "./utils/completions";
+import pkg from "../package.json";
 
 const cli = meow(
   `
@@ -33,6 +34,7 @@ const cli = meow(
 `,
   {
     importMeta: import.meta,
+    version: pkg.version,
     flags: {
       display: {
         type: "number",

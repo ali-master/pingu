@@ -9,7 +9,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }
