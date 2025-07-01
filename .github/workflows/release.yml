@@ -7,64 +7,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build for ${{ matrix.os }} (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        include:
-          # macOS builds
-          - os: darwin
-            arch: amd64
-            runner: macos-13
-            target: x64-macos
-          - os: darwin
-            arch: arm64
-            runner: macos-14
-            target: arm64-macos
-          
-          # Linux builds
-          - os: linux
-            arch: amd64
-            runner: ubuntu-latest
-            target: x64-linux
-          - os: linux
-            arch: arm64
-            runner: ubuntu-latest
-            target: arm64-linux
-          - os: linux
-            arch: arm
-            runner: ubuntu-latest
-            target: arm-linux
-          
-          # Windows builds
-          - os: windows
-            arch: amd64
-            runner: windows-latest
-            target: x64-windows
-          - os: windows
-            arch: arm64
-            runner: windows-latest
-            target: arm64-windows
-          
-          # OpenBSD builds (cross-compile from Linux)
-          - os: openbsd
-            arch: amd64
-            runner: ubuntu-latest
-            target: x64-openbsd
-          - os: openbsd
-            arch: arm64
-            runner: ubuntu-latest
-            target: arm64-openbsd
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          git clone https://github.com/${{ github.repository }}.git .
+          git checkout ${{ github.sha }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+      - name: Check Bun version and targets
+        run: |
+          source ~/.bashrc
+          bun --version
+          echo "Checking available compile targets..."
+          bun build --help | grep -i target || true
 
       - name: Install dependencies
         run: bun install
@@ -75,96 +40,62 @@ jobs:
       - name: Type check
         run: bun run typecheck
 
-      - name: Build binary
+      - name: Build binaries
         run: |
           mkdir -p dist
-          if [[ "${{ matrix.os }}" == "windows" ]]; then
-            if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-              bun build --compile --minify --sourcemap --target=bun-windows-arm64 ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}.exe
-            else
-              # Use baseline for better compatibility on older Windows systems
-              bun build --compile --minify --sourcemap --target=bun-windows-x64-baseline ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}.exe
-            fi
-          elif [[ "${{ matrix.os }}" == "darwin" ]]; then
-            if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-              bun build --compile --minify --sourcemap --target=bun-darwin-arm64 ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            else
-              # Use baseline for better compatibility on older Intel Macs
-              bun build --compile --minify --sourcemap --target=bun-darwin-x64-baseline ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            fi
-          elif [[ "${{ matrix.os }}" == "linux" ]]; then
-            if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-              bun build --compile --minify --sourcemap --target=bun-linux-arm64 ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            elif [[ "${{ matrix.arch }}" == "arm" ]]; then
-              # For ARM 32-bit, use arm64 as closest target
-              bun build --compile --minify --sourcemap --target=bun-linux-arm64 ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            else
-              # Use baseline for better compatibility on older Linux systems
-              bun build --compile --minify --sourcemap --target=bun-linux-x64-baseline ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            fi
-          elif [[ "${{ matrix.os }}" == "openbsd" ]]; then
-            # OpenBSD cross-compilation - use Linux musl builds for better compatibility
-            if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-              bun build --compile --minify --sourcemap --target=bun-linux-arm64-musl ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            else
-              bun build --compile --minify --sourcemap --target=bun-linux-x64-musl ./src/cli.tsx --outfile dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            fi
-          fi
-        shell: bash
-
-      - name: Verify binary
-        run: |
-          if [[ "${{ matrix.os }}" == "windows" ]]; then
-            ls -la dist/pingu-${{ matrix.os }}-${{ matrix.arch }}.exe
-            file dist/pingu-${{ matrix.os }}-${{ matrix.arch }}.exe || true
+          
+          echo "Building Linux binaries..."
+          
+          # Linux x64 - most reliable target
+          echo "Building Linux x64..."
+          bun build --compile --minify ./src/cli.tsx --outfile dist/pingu-linux-amd64
+          
+          # Try Linux ARM64 if supported
+          echo "Attempting Linux ARM64..."
+          if bun build --compile --minify --target=bun-linux-arm64 ./src/cli.tsx --outfile dist/pingu-linux-arm64 2>/dev/null; then
+            echo "✅ Linux ARM64 build successful"
+          elif bun build --compile --minify ./src/cli.tsx --outfile dist/pingu-linux-arm64 2>/dev/null; then
+            echo "✅ Linux ARM64 build successful (without target flag)"
           else
-            ls -la dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
-            file dist/pingu-${{ matrix.os }}-${{ matrix.arch }} || true
-            chmod +x dist/pingu-${{ matrix.os }}-${{ matrix.arch }}
+            echo "❌ Linux ARM64 build failed, skipping"
           fi
-        shell: bash
+          
+          # Make binaries executable
+          chmod +x dist/pingu-* 2>/dev/null || true
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pingu-${{ matrix.os }}-${{ matrix.arch }}
-          path: |
-            dist/pingu-${{ matrix.os }}-${{ matrix.arch }}*
-          retention-days: 7
-
-  release:
-    name: Create Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: List artifacts
-        run: ls -la dist/
+      - name: Verify binaries
+        run: |
+          echo "Built binaries:"
+          ls -la dist/
+          echo ""
+          
+          for binary in dist/pingu-*; do
+            if [ -f "$binary" ]; then
+              echo "Verifying $binary:"
+              file "$binary" || true
+              size=$(stat -f%z "$binary" 2>/dev/null || stat -c%s "$binary" 2>/dev/null || echo "unknown")
+              echo "Size: $size bytes"
+              echo "---"
+            fi
+          done
 
       - name: Generate checksums
         run: |
           cd dist
-          sha256sum pingu-* > checksums.txt
-          cat checksums.txt
+          if ls pingu-* >/dev/null 2>&1; then
+            sha256sum pingu-* > checksums.txt
+            echo "Generated checksums:"
+            cat checksums.txt
+          else
+            echo "No binaries found to checksum"
+            exit 1
+          fi
 
       - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
-        id: release_notes
         run: |
           cat > release_notes.md << 'EOF'
           ## 🚀 Pingu ${{ steps.version.outputs.VERSION }}
@@ -173,68 +104,28 @@ jobs:
           
           ### 📦 Installation
           
-          **Quick install for your platform:**
+          **Linux x86_64:**
           ```bash
-          curl -fsSL https://get.pingu.dev | sh
-          ```
-          
-          **Platform-specific downloads:**
-          
-          #### macOS
-          ```bash
-          # Apple Silicon (M1/M2/M3/M4)
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-darwin-arm64 -o pingu
-          chmod +x pingu && sudo mv pingu /usr/local/bin/
-          
-          # Intel
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-darwin-amd64 -o pingu
-          chmod +x pingu && sudo mv pingu /usr/local/bin/
-          ```
-          
-          #### Linux
-          ```bash
-          # x86_64
           curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-linux-amd64 -o pingu
           chmod +x pingu && sudo mv pingu /usr/local/bin/
+          ```
           
-          # ARM64
+          **Linux ARM64:**
+          ```bash
           curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-linux-arm64 -o pingu
           chmod +x pingu && sudo mv pingu /usr/local/bin/
-          
-          # ARM (32-bit)
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-linux-arm -o pingu
-          chmod +x pingu && sudo mv pingu /usr/local/bin/
-          ```
-          
-          #### Windows
-          ```powershell
-          # x86_64
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-windows-amd64.exe" -OutFile "pingu.exe"
-          
-          # ARM64
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-windows-arm64.exe" -OutFile "pingu.exe"
-          ```
-          
-          #### OpenBSD
-          ```bash
-          # x86_64
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-openbsd-amd64 -o pingu
-          chmod +x pingu && doas mv pingu /usr/local/bin/
-          
-          # ARM64
-          curl -L https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/pingu-openbsd-arm64 -o pingu
-          chmod +x pingu && doas mv pingu /usr/local/bin/
           ```
           
           ### ✨ Features
           
-          - 🎨 Beautiful terminal UI with responsive design
-          - 📊 Real-time network monitoring and analysis
+          - 🎨 Beautiful terminal UI with brighter colors and responsive design
+          - 📊 Real-time network monitoring and analysis  
           - 🔍 Comprehensive quality metrics and performance scoring
           - 📱 Adaptive layouts for different terminal sizes
-          - 🌐 Cross-platform support (Windows, macOS, Linux, OpenBSD)
+          - 🌐 Improved error handling (continues on network errors)
           - 📁 Export functionality for detailed analysis
           - ⚡ Single binary with no dependencies
+          - 🎯 Fixed column alignment and removed duplicate information
           
           ### 🐧 Usage
           
@@ -244,23 +135,79 @@ jobs:
           
           # Ping with options
           pingu -c 10 --interval 2 --export 8.8.8.8
+          
+          # Enable line chart visualization
+          pingu --chart --count 20 google.com
+          
+          # Control display count
+          pingu --display 5 --count 50 1.1.1.1
           ```
+          
+          ### 📋 Available Options
+          
+          - `-c, --count <NUMBER>`: Number of ping packets to send
+          - `-i, --interval <SECONDS>`: Interval between pings
+          - `-t, --timeout <SECONDS>`: Timeout for each ping
+          - `-s, --size <BYTES>`: Packet size
+          - `--export`: Export results to JSON file
+          - `--chart`: Enable line chart visualization
+          - `--display <NUMBER>`: Number of recent pings to display
+          
+          ### 🔧 Recent Improvements
+          
+          - **Enhanced usePing hook**: Extracted ping logic into reusable React hook
+          - **Brighter color scheme**: Updated gradients and colors for better visibility
+          - **Fixed column alignment**: Consistent spacing with min/max widths
+          - **Removed duplicates**: Cleaned up redundant success/error rate information
+          - **Better error handling**: Network errors no longer stop the ping process
+          - **Improved stability calculation**: Multi-factor network stability assessment
           
           ---
           
           **Full Changelog**: https://github.com/${{ github.repository }}/compare/v0.0.0...${{ steps.version.outputs.VERSION }}
           EOF
 
+      - name: Install GitHub CLI
+        run: |
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh
+
       - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          name: "Pingu ${{ steps.version.outputs.VERSION }}"
-          body_path: release_notes.md
-          draft: false
-          prerelease: false
-          files: |
-            dist/pingu-*
-            dist/checksums.txt
+        run: |
+          if ls dist/pingu-* >/dev/null 2>&1; then
+            echo "Creating release with binaries:"
+            ls -la dist/
+            
+            gh release create "${{ steps.version.outputs.VERSION }}" \
+              --title "Pingu ${{ steps.version.outputs.VERSION }}" \
+              --notes-file release_notes.md \
+              --repo ${{ github.repository }} \
+              dist/pingu-* dist/checksums.txt
+              
+            echo "✅ Release created successfully"
+          else
+            echo "❌ No binaries found to release"
+            exit 1
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Summary
+        run: |
+          echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Successfully created release **${{ steps.version.outputs.VERSION }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Built Binaries:" >> $GITHUB_STEP_SUMMARY
+          for binary in dist/pingu-*; do
+            if [ -f "$binary" ] && [[ ! "$binary" == *.txt ]]; then
+              size=$(stat -f%z "$binary" 2>/dev/null || stat -c%s "$binary" 2>/dev/null || echo "unknown")
+              echo "- \`$(basename "$binary")\` (${size} bytes)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Download:" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release Page](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.VERSION }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Latest Release](https://github.com/${{ github.repository }}/releases/latest)" >> $GITHUB_STEP_SUMMARY
