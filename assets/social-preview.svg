@@ -2,13 +2,14 @@
 <svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1"/>
-      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1"/>
+      <stop offset="0%" style="stop-color:#0f0c29;stop-opacity:1"/>
+      <stop offset="35%" style="stop-color:#302b63;stop-opacity:1"/>
+      <stop offset="70%" style="stop-color:#24243e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1"/>
     </linearGradient>
     <linearGradient id="terminalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:0.95"/>
-      <stop offset="100%" style="stop-color:#16213e;stop-opacity:0.95"/>
+      <stop offset="0%" style="stop-color:#0d1117;stop-opacity:0.95"/>
+      <stop offset="100%" style="stop-color:#161b22;stop-opacity:0.95"/>
     </linearGradient>
     <filter id="glow">
       <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -44,24 +45,45 @@
     <!-- Main penguin logo -->
     <circle cx="0" cy="0" r="100" fill="url(#terminalGradient)" filter="url(#softGlow)"/>
 
-    <!-- Penguin silhouette -->
-    <g fill="#00d4ff" filter="url(#glow)">
-      <ellipse cx="0" cy="10" rx="35" ry="50"/>
-      <circle cx="0" cy="-35" r="30"/>
-      <ellipse cx="0" cy="15" rx="22" ry="35" fill="#ffffff"/>
+    <!-- Refined penguin logo from logo.svg -->
+    <g filter="url(#glow)">
+      <!-- Main silhouette with modern gradient -->
+      <path d="M-40,20 Q-40,-50 0,-70 Q40,-50 40,20 Q40,60 0,70 Q-40,60 -40,20 Z" 
+            fill="#00d4ff"/>
+      
+      <!-- Simple eyes -->
+      <circle cx="-14" cy="-36" r="4" fill="#ffffff"/>
+      <circle cx="14" cy="-36" r="4" fill="#ffffff"/>
+      <circle cx="-14" cy="-34" r="2" fill="#1a1a2e"/>
+      <circle cx="14" cy="-34" r="2" fill="#1a1a2e"/>
+      
+      <!-- Minimal beak -->
+      <circle cx="0" cy="-24" r="4" fill="#ff6b35"/>
+      
+      <!-- Subtle belly -->
+      <ellipse cx="0" cy="10" rx="20" ry="30" fill="#ffffff" opacity="0.8"/>
+    </g>
 
-      <!-- Eyes -->
-      <circle cx="-12" cy="-40" r="4" fill="#ffffff"/>
-      <circle cx="12" cy="-40" r="4" fill="#ffffff"/>
-      <circle cx="-12" cy="-38" r="2" fill="#1a1a2e"/>
-      <circle cx="12" cy="-38" r="2" fill="#1a1a2e"/>
-
-      <!-- Beak -->
-      <polygon points="0,-25 -6,-18 6,-18" fill="#ff6b35"/>
-
-      <!-- Wings -->
-      <ellipse cx="-28" cy="5" rx="12" ry="28" fill="#0099cc"/>
-      <ellipse cx="28" cy="5" rx="12" ry="28" fill="#0099cc"/>
+    <!-- Ping signal dots around the logo -->
+    <g opacity="0.6">
+      <circle cx="65" cy="-40" r="4" fill="#00d4ff">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="80" cy="0" r="3" fill="#ff6b9d">
+        <animate attributeName="opacity" values="1;0.6;1" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="60" cy="40" r="3" fill="#00d4ff">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="-65" cy="-40" r="4" fill="#ff6b9d">
+        <animate attributeName="opacity" values="1;0.6;1" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="-80" cy="0" r="3" fill="#00d4ff">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="-60" cy="40" r="3" fill="#ff6b9d">
+        <animate attributeName="opacity" values="1;0.6;1" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
     </g>
 
     <!-- Animated ping waves around logo -->
@@ -132,7 +154,7 @@
     <rect x="0" y="0" width="480" height="240" rx="12" fill="url(#terminalGradient)" filter="url(#glow)"/>
 
     <!-- Terminal header -->
-    <rect x="0" y="0" width="480" height="30" rx="12" fill="#2a2a3e"/>
+    <rect x="0" y="0" width="480" height="30" rx="12" fill="#21262d"/>
     <circle cx="20" cy="15" r="5" fill="#ff5f57"/>
     <circle cx="40" cy="15" r="5" fill="#ffbd2e"/>
     <circle cx="60" cy="15" r="5" fill="#28ca42"/>
@@ -194,15 +216,20 @@
     </g>
   </g>
 
-  <!-- GitHub and Installation hint -->
+  <!-- GitHub Repository Link -->
   <g transform="translate(640, 580)">
-    <text x="0" y="0" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-          font-size="14" font-weight="600" fill="#ffffff" opacity="0.7">
+    <!-- Background highlight box with better color -->
+    <rect x="-140" y="-12" width="280" height="32" rx="16" fill="#ffffff" stroke="#ffffff" stroke-width="1" opacity="0.2"/>
+
+    <!-- GitHub icon -->
+    <g transform="translate(-105, 8)" fill="#ffffff">
+      <path d="M-8,-8 C-11.3,-8 -14,-5.3 -14,-2 C-14,0.4 -12.4,2.4 -10.1,3.2 C-9.8,3.3 -9.7,3.1 -9.7,2.9 C-9.7,2.7 -9.7,2.1 -9.7,1.4 C-11.5,1.8 -11.9,0.5 -11.9,0.5 C-12.2,-0.2 -12.6,-0.4 -12.6,-0.4 C-13.2,-0.8 -12.5,-0.8 -12.5,-0.8 C-11.8,-0.7 -11.4,-0.1 -11.4,-0.1 C-10.8,0.8 -9.9,0.5 -9.7,0.4 C-9.6,-0.0 -9.4,-0.3 -9.2,-0.5 C-10.7,-0.7 -12.3,-1.3 -12.3,-3.5 C-12.3,-4.2 -12.0,-4.7 -11.4,-5.1 C-11.5,-5.3 -11.7,-6.0 -11.3,-6.9 C-11.3,-6.9 -10.7,-7.1 -9.7,-6.4 C-9.2,-6.6 -8.6,-6.7 -8.0,-6.7 C-7.4,-6.7 -6.8,-6.6 -6.3,-6.4 C-5.3,-7.1 -4.7,-6.9 -4.7,-6.9 C-4.3,-6.0 -4.5,-5.3 -4.6,-5.1 C-4.0,-4.7 -3.7,-4.2 -3.7,-3.5 C-3.7,-1.3 -5.3,-0.7 -6.8,-0.5 C-6.5,-0.2 -6.3,0.3 -6.3,1.1 C-6.3,2.2 -6.3,3.1 -6.3,3.3 C-6.3,3.5 -6.2,3.7 -5.9,3.6 C-3.6,2.8 -2.0,0.8 -2.0,-1.6 C-2.0,-5.3 -4.7,-8.0 -8.0,-8.0 Z"/>
+    </g>
+
+    <!-- Repository URL -->
+    <text x="10" y="9" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="16" font-weight="600" fill="#ffffff" opacity="0.95">
       github.com/ali-master/pingu
-    </text>
-    <text x="0" y="25" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-          font-size="12" font-weight="400" fill="#ffffff" opacity="0.5">
-      curl -fsSL https://get.pingu.dev | sh
     </text>
   </g>
 </svg>
