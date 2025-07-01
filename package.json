@@ -58,7 +58,6 @@
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
-    "figlet": "^1.8.1",
     "gradient-string": "^3.0.0",
     "ink": "^6.0.1",
     "meow": "^13.2.0",
@@ -68,7 +67,6 @@
     "@sindresorhus/tsconfig": "^7.0.0",
     "@testing-library/react": "^16.3.0",
     "@types/bun": "^1.2.17",
-    "@types/figlet": "^1.7.0",
     "@types/react": "^19.1.8",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",

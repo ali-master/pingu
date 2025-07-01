@@ -15,12 +15,6 @@ vi.mock("meow", () => ({
   default: vi.fn(),
 }));
 
-vi.mock("figlet", () => ({
-  default: {
-    textSync: vi.fn(() => "PINGU ASCII ART"),
-  },
-}));
-
 vi.mock("gradient-string", () => ({
   default: vi.fn(() => vi.fn(() => "COLORED PINGU")),
 }));
@@ -142,13 +136,11 @@ describe("CLI Module", () => {
   });
 
   test("should display ASCII art banner", async () => {
-    const mockFiglet = await import("figlet");
     const mockGradient = await import("gradient-string");
     const mockMeow = await import("meow");
 
     const gradientFunction = vi.fn(() => "COLORED PINGU");
     (mockGradient.default as any).mockReturnValue(gradientFunction);
-    (mockFiglet.default.textSync as any).mockReturnValue("PINGU ASCII ART");
 
     (mockMeow.default as any).mockReturnValue({
       input: ["test.com"],
@@ -158,12 +150,6 @@ describe("CLI Module", () => {
 
     // Import CLI module
     await import("../src/cli");
-
-    expect(mockFiglet.default.textSync).toHaveBeenCalledWith("PINGU", {
-      font: "ANSI Shadow",
-      horizontalLayout: "default",
-      verticalLayout: "default",
-    });
 
     expect(mockGradient.default).toHaveBeenCalledWith(["cyan", "pink"]);
     expect(gradientFunction).toHaveBeenCalledWith("PINGU ASCII ART");

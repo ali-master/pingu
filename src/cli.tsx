@@ -4,21 +4,7 @@ import React from "react";
 import { render } from "ink";
 import meow from "meow";
 import App from "./app";
-import figlet from "figlet";
-import gradient from "gradient-string";
 import { generateCompletion, printCompletionHelp } from "./utils/completions";
-
-console.log();
-console.log(
-  gradient(["cyan", "pink"])(
-    figlet.textSync("PINGU", {
-      font: "ANSI Shadow",
-      horizontalLayout: "default",
-      verticalLayout: "default",
-    }),
-  ),
-);
-console.log();
 
 const cli = meow(
   `
