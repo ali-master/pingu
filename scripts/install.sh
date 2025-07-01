@@ -75,29 +75,58 @@ download_with_progress() {
     local size
     size=$(get_file_size "$url")
     
+    # Show download information
+    if [ -n "$size" ] && [ "$size" -gt 0 ]; then
+        echo -e "  ${BLUE}📥 Downloading Pingu ($(format_bytes "$size"))${NC}"
+        echo -e "  ${INFO} Expected size: ${GREEN}$(format_bytes "$size")${NC}"
+    else
+        echo -e "  ${BLUE}📥 Downloading Pingu${NC}"
+        echo -e "  ${WARN} Size information not available"
+    fi
+    
+    # Show download details
+    echo -e "  ${INFO} Using $(command_exists curl && echo "curl" || echo "wget") for download"
+    echo ""
+    
     if command_exists curl; then
-        if [ -n "$size" ] && [ "$size" -gt 0 ]; then
-            echo -e "${BLUE}📥 Downloading Pingu ($(format_bytes "$size"))${NC}"
-        else
-            echo -e "${BLUE}📥 Downloading Pingu${NC}"
+        # Use curl with detailed progress
+        echo -e "  ${DIM}Download Progress:${NC}"
+        if ! curl -L --progress-bar \
+             --connect-timeout 30 \
+             --max-time 600 \
+             --retry 3 \
+             --retry-delay 2 \
+             --user-agent "Pingu-Installer/1.0" \
+             "$url" -o "$output"; then
+            return 1
         fi
-        
-        # Use curl with progress bar
-        curl -L --progress-bar "$url" -o "$output" || return 1
         
     elif command_exists wget; then
-        if [ -n "$size" ] && [ "$size" -gt 0 ]; then
-            echo -e "${BLUE}📥 Downloading Pingu ($(format_bytes "$size"))${NC}"
-        else
-            echo -e "${BLUE}📥 Downloading Pingu${NC}"
+        # Use wget with detailed progress
+        echo -e "  ${DIM}Download Progress:${NC}"
+        if ! wget --show-progress \
+             --progress=bar:force:noscroll \
+             --timeout=30 \
+             --tries=3 \
+             --waitretry=2 \
+             --user-agent="Pingu-Installer/1.0" \
+             "$url" -O "$output"; then
+            return 1
         fi
-        
-        # Use wget with progress bar
-        wget --show-progress -q "$url" -O "$output" || return 1
         
     else
         error_exit "curl or wget is required to download Pingu"
     fi
+    
+    # Verify download completed
+    local actual_size
+    actual_size=$(stat -f%z "$output" 2>/dev/null || stat -c%s "$output" 2>/dev/null || echo "0")
+    
+    if [ -n "$size" ] && [ "$size" -gt 0 ] && [ "$actual_size" -ne "$size" ]; then
+        echo -e "  ${WARN} Size mismatch: expected $(format_bytes "$size"), got $(format_bytes "$actual_size")"
+    fi
+    
+    echo -e "  ${CHECKMARK} Downloaded $(format_bytes "$actual_size")"
 }
 
 # Function to detect package manager
@@ -256,6 +285,10 @@ cd "$TMP_DIR"
 
 # Download binary with progress
 print_step "Downloading Pingu"
+echo -e "  ${INFO} Source: ${DIM}${DOWNLOAD_URL}${NC}"
+echo -e "  ${INFO} Target: ${DIM}${LOCAL_BINARY}${NC}"
+echo ""
+
 if ! download_with_progress "$DOWNLOAD_URL" "$LOCAL_BINARY"; then
     rm -rf "$TMP_DIR"
     error_exit "Failed to download Pingu from $DOWNLOAD_URL"
@@ -263,22 +296,64 @@ fi
 echo -e "  ${CHECKMARK} Download completed successfully"
 echo ""
 
-# Verify download
+print_step "Verifying Download"
+# Verify download exists
 if [ ! -f "$LOCAL_BINARY" ]; then
     rm -rf "$TMP_DIR"
     error_exit "Downloaded file not found"
 fi
 
+# Get file information
 FILE_SIZE=$(stat -f%z "$LOCAL_BINARY" 2>/dev/null || stat -c%s "$LOCAL_BINARY" 2>/dev/null || echo "0")
 if [ "$FILE_SIZE" -eq 0 ]; then
     rm -rf "$TMP_DIR"
     error_exit "Downloaded file is empty"
 fi
-echo -e "  ${CHECKMARK} File verified ($(format_bytes "$FILE_SIZE"))"
+
+# Calculate checksums
+echo -e "  ${INFO} Calculating checksums..."
+if command_exists sha256sum; then
+    SHA256=$(sha256sum "$LOCAL_BINARY" | awk '{print $1}')
+    echo -e "  ${CHECKMARK} SHA256: ${DIM}${SHA256}${NC}"
+elif command_exists shasum; then
+    SHA256=$(shasum -a 256 "$LOCAL_BINARY" | awk '{print $1}')
+    echo -e "  ${CHECKMARK} SHA256: ${DIM}${SHA256}${NC}"
+fi
+
+if command_exists md5sum; then
+    MD5=$(md5sum "$LOCAL_BINARY" | awk '{print $1}')
+    echo -e "  ${CHECKMARK} MD5: ${DIM}${MD5}${NC}"
+elif command_exists md5; then
+    MD5=$(md5 -q "$LOCAL_BINARY")
+    echo -e "  ${CHECKMARK} MD5: ${DIM}${MD5}${NC}"
+fi
+
+# File type detection
+if command_exists file; then
+    FILE_TYPE=$(file "$LOCAL_BINARY")
+    echo -e "  ${CHECKMARK} File type: ${DIM}${FILE_TYPE}${NC}"
+fi
+
+# File size verification
+echo -e "  ${CHECKMARK} File size: ${GREEN}$(format_bytes "$FILE_SIZE")${NC}"
+
+# Verify it's executable
+if file "$LOCAL_BINARY" | grep -q "executable"; then
+    echo -e "  ${CHECKMARK} Executable format verified"
+else
+    echo -e "  ${WARN} Warning: File may not be executable format"
+fi
 
 # Make executable
 chmod +x "$LOCAL_BINARY"
-echo -e "  ${CHECKMARK} Made executable"
+echo -e "  ${CHECKMARK} Execute permissions set"
+
+# Final verification
+if [ -x "$LOCAL_BINARY" ]; then
+    echo -e "  ${CHECKMARK} Binary is ready for installation"
+else
+    error_exit "Failed to set execute permissions"
+fi
 echo ""
 
 # Install to system
