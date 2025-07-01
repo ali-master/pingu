@@ -1,14 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
 # Portable echo function that works with both bash and sh
 echo_e() {
-    if [ "$BASH_VERSION" ]; then
-        echo -e "$@"
-    else
-        printf "%b\n" "$*"
-    fi
+    # Use printf for maximum portability across all shells
+    printf '%b\n' "$*"
 }
 
 # Pingu installer script
@@ -402,7 +399,7 @@ else
     echo_e "  ${CHECKMARK} Installed to: ${GREEN}$INSTALL_PATH${NC}"
     
     # Check if directory is in PATH
-    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    if ! echo ":$PATH:" | grep -q ":$INSTALL_DIR:"; then
         echo_e "  ${WARN} ${YELLOW}$INSTALL_DIR is not in your PATH${NC}"
         echo ""
         echo_e "  Add this line to your shell configuration file:"
