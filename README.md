@@ -34,7 +34,7 @@
 
 ```bash
 # Install latest version for your platform (auto-detects OS/arch)
-curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh
 ```
 
 > **Note**: The installer automatically detects your operating system and CPU architecture, downloads the appropriate binary, and installs it to your system. It will try to install to `/usr/local/bin` (with sudo if needed) or fall back to `~/bin`.
@@ -79,7 +79,7 @@ $env:PATH += ";$PWD"
 
 ```bash
 # Run the installer again to upgrade to the latest version
-curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh
 ```
 
 The installer will:

@@ -3,7 +3,7 @@
 set -e
 
 # Pingu installer script
-# Usage: curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/main/scripts/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/ali-master/pingu/master/scripts/install.sh | sh
 
 REPO="ali-master/pingu"
 VERSION="latest"

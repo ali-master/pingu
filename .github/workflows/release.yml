@@ -168,7 +168,7 @@ jobs:
           
           **One-line installer (recommended):**
           ```bash
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/master/scripts/install.sh | sh
           ```
           
           **Manual Downloads:**
