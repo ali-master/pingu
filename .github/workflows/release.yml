@@ -115,13 +115,23 @@ jobs:
 
       - name: Generate Changelog
         run: |
-          # Extract version without refs prefix
-          VERSION="${GITHUB_REF#refs/tags/}"
-          
-          # Verify this is actually a tag, not a branch
-          if [[ "$GITHUB_REF" != refs/tags/* ]]; then
-            echo "Error: This workflow should only run on tags, but got: $GITHUB_REF"
-            exit 1
+          # Handle version extraction for both tag and manual triggers
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            # Extract version from tag
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "Running on tag: $VERSION"
+          else
+            # For manual triggers, get the latest tag or create a version based on commit
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -n "$LATEST_TAG" ]; then
+              # Increment patch version for manual release
+              VERSION="${LATEST_TAG%.*}.$((${LATEST_TAG##*.} + 1))"
+              echo "Manual trigger: incrementing from $LATEST_TAG to $VERSION"
+            else
+              # No tags exist, start with v1.0.0
+              VERSION="v1.0.0"
+              echo "No previous tags found, using initial version: $VERSION"
+            fi
           fi
           
           echo "Generating changelog for version: $VERSION"
@@ -236,6 +246,9 @@ jobs:
           
           echo "Generated changelog:"
           cat release_notes.md
+          
+          # Export VERSION for use in subsequent steps
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Install GitHub CLI
         run: |
@@ -250,9 +263,16 @@ jobs:
             echo "Creating release with binaries:"
             ls -la dist/
             
-            # Extract version without refs prefix
-            VERSION="${GITHUB_REF#refs/tags/}"
             echo "Using version: $VERSION"
+            
+            # Create and push tag if this was a manual trigger (not already a tag)
+            if [[ "$GITHUB_REF" != refs/tags/* ]]; then
+              echo "Creating and pushing tag: $VERSION"
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git tag -a "$VERSION" -m "Release $VERSION"
+              git push origin "$VERSION"
+            fi
             
             gh release create "$VERSION" \
               --title "Pingu $VERSION" \
@@ -270,8 +290,6 @@ jobs:
 
       - name: Release Summary
         run: |
-          # Extract version without refs prefix
-          VERSION="${GITHUB_REF#refs/tags/}"
           echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Successfully created release **$VERSION**" >> $GITHUB_STEP_SUMMARY
