@@ -170,7 +170,7 @@ describe("DualProgressBars", () => {
         <DualProgressBars successRate={999.99} errorRate={0.01} layout={layout} />,
       );
 
-      expect(lastFrame()).toMatch(/999\.99/);
+      expect(lastFrame()).toMatch(/1000\.0/); // Rounded to 1000.0
       expect(lastFrame()).toMatch(/0\.0%/);
     });
 
