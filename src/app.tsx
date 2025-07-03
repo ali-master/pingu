@@ -138,88 +138,61 @@ export default function App({ host, options }: Props) {
             borderStyle="single"
             borderColor="gray"
           >
-            {/* Primary Stats Row */}
-            <Box>
-              <Box width="33%" minWidth={25} paddingRight={1}>
-                <Text color="gray">
-                  Success: <Text>{successGradient(`${ping.successfulPings} packets`)}</Text>
+            {/* All Stats in Single Line */}
+            <Box flexWrap="wrap" gap={1}>
+              <Text>
+                <Text color="gray">Success: </Text>
+                <Text>{successGradient(`${ping.successfulPings} packets`)}</Text>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Failed: </Text>
+                <Text>{errorGradient(`${ping.failedPings} packets`)}</Text>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Rate: </Text>
+                <Text
+                  color={
+                    ping.successRate >= 95
+                      ? "greenBright"
+                      : ping.successRate >= 80
+                        ? "yellowBright"
+                        : "redBright"
+                  }
+                >
+                  {ping.successRate.toFixed(1)}%
                 </Text>
-              </Box>
-              <Box width="33%" minWidth={25} paddingX={1}>
-                <Text color="gray">
-                  Failed: <Text>{errorGradient(`${ping.failedPings} packets`)}</Text>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Avg Response: </Text>
+                <Text>{metricGradient(`${ping.analysis.avgSuccessTime?.toFixed(1)}ms`)}</Text>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Quality: </Text>
+                <Text
+                  color={
+                    ping.analysis.networkQualityScore >= 80
+                      ? "green"
+                      : ping.analysis.networkQualityScore >= 60
+                        ? "yellow"
+                        : "red"
+                  }
+                >
+                  {ping.analysis.networkQualityText} ({ping.analysis.networkQualityScore.toFixed(1)}
+                  /100)
                 </Text>
-              </Box>
-              <Box width="34%" minWidth={25} paddingLeft={1}>
-                <Text color="gray">
-                  Rate:{" "}
-                  <Text
-                    color={
-                      ping.successRate >= 95
-                        ? "greenBright"
-                        : ping.successRate >= 80
-                          ? "yellowBright"
-                          : "redBright"
-                    }
-                  >
-                    {ping.successRate.toFixed(1)}%
-                  </Text>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Packet Loss: </Text>
+                <Text color="redBright">{ping.analysis.packetLoss.toFixed(2)}%</Text>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Current Streak: </Text>
+                <Text
+                  color={
+                    ping.analysis.currentStreak.type === "success" ? "greenBright" : "redBright"
+                  }
+                >
+                  {ping.analysis.currentStreak.count}{" "}
+                  {ping.analysis.currentStreak.type === "success" ? "successes" : "failures"}
                 </Text>
-              </Box>
-            </Box>
-
-            {/* Performance Stats Row */}
-            <Box>
-              <Box width="50%">
-                <Text color="gray">
-                  Avg Response:{" "}
-                  <Text>{metricGradient(`${ping.analysis.avgSuccessTime?.toFixed(1)}ms`)}</Text>
-                </Text>
-              </Box>
-              <Box width="50%">
-                <Text color="gray">
-                  Quality:{" "}
-                  <Text
-                    color={
-                      ping.analysis.networkQualityScore >= 80
-                        ? "green"
-                        : ping.analysis.networkQualityScore >= 60
-                          ? "yellow"
-                          : "red"
-                    }
-                  >
-                    {ping.analysis.networkQualityText} (
-                    {ping.analysis.networkQualityScore.toFixed(1)}/100)
-                  </Text>
-                </Text>
-              </Box>
-            </Box>
-
-            {/* Additional Info Row */}
-            <Box>
-              <Box width="33%">
-                <Text color="gray">
-                  Packet Loss: <Text color="redBright">{ping.analysis.packetLoss.toFixed(2)}%</Text>
-                </Text>
-              </Box>
-              <Box width="33%">
-                <Text color="gray">
-                  Current Streak:{" "}
-                  <Text
-                    color={
-                      ping.analysis.currentStreak.type === "success" ? "greenBright" : "redBright"
-                    }
-                  >
-                    {ping.analysis.currentStreak.count}{" "}
-                    {ping.analysis.currentStreak.type === "success" ? "successes" : "failures"}
-                  </Text>
-                </Text>
-              </Box>
-              <Box width="34%">
-                <Text color="gray">
-                  Duration: <Text color="cyanBright">{ping.duration}</Text>
-                </Text>
-              </Box>
+                <Text color="gray"> :: </Text>
+                <Text color="gray">Duration: </Text>
+                <Text color="cyanBright">{ping.duration}</Text>
+              </Text>
             </Box>
           </Box>
 
@@ -240,31 +213,25 @@ export default function App({ host, options }: Props) {
               <Text color="gray" bold>
                 Response Time Statistics:
               </Text>
-              <Box gap={3} alignItems="center" flexWrap="wrap" marginTop={1} paddingLeft={1}>
-                <Text color="gray">
-                  Min Response:{" "}
+              <Box marginTop={1} paddingLeft={1}>
+                <Text>
+                  <Text color="gray">Min Response: </Text>
                   <Text color="greenBright">{ping.analysis.minSuccessTimeHuman || "N/A"}</Text>
-                </Text>
-                <Text color="gray">
-                  Max Response:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Max Response: </Text>
                   <Text color="yellowBright">{ping.analysis.maxSuccessTimeHuman || "N/A"}</Text>
-                </Text>
-                <Text color="gray">
-                  Median:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Median: </Text>
                   <Text color="cyanBright">
                     {ping.analysis.medianSuccessTime?.toFixed(2) || "N/A"}ms
                   </Text>
-                </Text>
-              </Box>
-              <Box gap={3} alignItems="center" flexWrap="wrap" marginTop={1} paddingLeft={1}>
-                <Text color="gray">
-                  Std Deviation:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Std Deviation: </Text>
                   <Text color="magenta">
                     {ping.analysis.responseTimeStdDev?.toFixed(2) || "N/A"}ms
                   </Text>
-                </Text>
-                <Text color="gray">
-                  Jitter:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Jitter: </Text>
                   <Text
                     color={
                       (ping.analysis.jitter || 0) > 50
@@ -276,9 +243,8 @@ export default function App({ host, options }: Props) {
                   >
                     {ping.analysis.jitter?.toFixed(2) || "0.00"}ms
                   </Text>
-                </Text>
-                <Text color="gray">
-                  Consistency:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Consistency: </Text>
                   <Text
                     color={
                       ping.analysis.consistency >= 70
@@ -301,19 +267,17 @@ export default function App({ host, options }: Props) {
               <Text color="gray" bold>
                 Connection Analysis:
               </Text>
-              <Box gap={3} alignItems="center" flexWrap="wrap" marginTop={1} paddingLeft={1}>
-                <Text color="gray">
-                  Stability:{" "}
+              <Box marginTop={1} paddingLeft={1}>
+                <Text>
+                  <Text color="gray">Stability: </Text>
                   <Text color={ping.analysis.isStable ? "greenBright" : "redBright"}>
                     {ping.analysis.isStable ? "Network Stable" : "Network Unstable"}
                   </Text>
-                </Text>
-                <Text color="gray">
-                  Best Streak:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Best Streak: </Text>
                   <Text color="greenBright">{ping.analysis.longestSuccessStreak} successes</Text>
-                </Text>
-                <Text color="gray">
-                  Worst Streak:{" "}
+                  <Text color="gray"> :: </Text>
+                  <Text color="gray">Worst Streak: </Text>
                   <Text color="redBright">{ping.analysis.longestFailureStreak} failures</Text>
                 </Text>
               </Box>
