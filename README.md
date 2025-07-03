@@ -15,6 +15,10 @@
 
 ---
 
+<div align="center">
+  <img src="assets/demo.png" alt="Pingu Demo" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); margin: 20px 0;">
+</div>
+
 ## ✨ Features
 
 - 🎨 **Beautiful Terminal UI** - Built with [Ink](https://github.com/vadimdemedes/ink) and [Ink UI](https://github.com/vadimdemedes/ink-ui) components
