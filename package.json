@@ -1,6 +1,6 @@
 {
   "name": "@usex/pingu",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "A modern ping utility with beautiful CLI output, real-time network analysis, and comprehensive performance metrics",
   "keywords": [
     "ping",
