@@ -82,5 +82,8 @@
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
-  "packageManager": "bun@1.2.21"
+  "packageManager": "bun@1.2.21",
+  "publishConfig": {
+    "access": "public"
+  }
 }
